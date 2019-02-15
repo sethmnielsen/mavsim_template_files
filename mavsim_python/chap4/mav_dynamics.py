@@ -18,7 +18,7 @@ from tools.tools import Quaternion2Rotation, Quaternion2Euler
 np.set_printoptions(linewidth=100)
 
 class mav_dynamics:
-    def __init__(self, Ts):
+    def __init__(self, Ts=0.02):
         self._ts_simulation = Ts
         # set initial states based on parameter file
         # _state is the 13x1 internal state of the aircraft that is being propagated:
@@ -183,7 +183,6 @@ class mav_dynamics:
         dt = delta[1]
         da = delta[2]
         dr = delta[3]
-        delta_t = delta[3]
 
         # gravity
         fg = self.R_vb @ np.array([0,0, MAV.mass * MAV.gravity])  #### CHECK
@@ -193,7 +192,7 @@ class mav_dynamics:
         D = MAV.D_prop
         Va = self._Va
 
-        V_in = MAV.V_max * delta_t
+        V_in = MAV.V_max * dt
         a = rho * D**5 * MAV.C_Q0 / (2*np.pi)**2
         b = rho * D**4 * MAV.C_Q1 * Va / (2*np.pi) + MAV.KQ**2/MAV.R_motor
         c = rho * D**3 * MAV.C_Q2 * Va**2 - (MAV.KQ * V_in) / MAV.R_motor + MAV.KQ*MAV.i0
@@ -240,11 +239,6 @@ class mav_dynamics:
         rho = MAV.rho
         S = MAV.S_wing
 
-
-        # fa_y = 0.5*MAV.rho*self._Va**2 * MAV.S_wing * (MAV.C_Y_0 + MAV.C_Y_beta*self._beta)
-        # l = 0.5*MAV.rho*self._Va**2 * MAV.S_wing * MAV.b * (MAV.C_ell_0 + MAV.C_ell_beta*self._beta)
-        # n = 0.5*MAV.rho*self._Va**2 * MAV.S_wing * MAV.b * (MAV.C_n_0 + MAV.C_n_beta*self._beta)
-
         # Calculating fy
         fa_y = 1/2.0 * rho * (Va**2) * S * (MAV.C_Y_0 + MAV.C_Y_beta * beta + MAV.C_Y_p * (b / (2*Va)) * p +\
              MAV.C_Y_r * (b / (2 * Va)) * r + MAV.C_Y_delta_a * da + MAV.C_Y_delta_r * dr)
@@ -266,7 +260,7 @@ class mav_dynamics:
 
         # Summing forces and moments
         [fx, fy, fz] = fg + fa + fp
-        [Mx, My, Mz] = Ma + Mp
+        [Mx, My, Mz] = Ma - Mp
         self._forces[0] = fx
         self._forces[1] = fy
         self._forces[2] = fz

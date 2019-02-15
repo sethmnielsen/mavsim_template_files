@@ -9,13 +9,14 @@ sys.path.append('..')
 import numpy as np
 from scipy.optimize import minimize
 from tools.tools import Euler2Quaternion
+from chap4.mav_dynamics import mav_dynamics
 
 def compute_trim(mav, Va, gamma):
     # define initial state and input
     e = Euler2Quaternion([0, gamma, 0])
     state0 = np.array([0,    # (0)
                        0,    # (1)
-                       mav._state[2],    # (2)
+                       -100,    # (2)
                        Va,   # (3)
                        0,    # (4)
                        0,    # (5)
@@ -26,7 +27,12 @@ def compute_trim(mav, Va, gamma):
                        0,    # (10)
                        0,    # (11)
                        0])   # (12)
-    delta0 = 
+    delta_e = 0
+    delta_t = 0.5
+    delta_a = 0
+    delta_r = 0
+    delta0 = np.array([delta_e, delta_t, delta_a, delta_r])
+
     x0 = np.concatenate((state0, delta0), axis=0)
     # define equality constraints
     cons = ({'type': 'eq',
@@ -51,6 +57,7 @@ def compute_trim(mav, Va, gamma):
                                 [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
                                 ])
              })
+    
     # solve the minimization problem to find the trim states and inputs
     res = minimize(trim_objective, x0, method='SLSQP', args = (mav, Va, gamma),
                    constraints=cons, options={'ftol': 1e-10, 'disp': True})
@@ -59,7 +66,46 @@ def compute_trim(mav, Va, gamma):
     trim_input = np.array([res.x[13:17]]).T
     return trim_state, trim_input
 
-# objective function to be minimized
+# objective function t o be minimized
 def trim_objective(x, mav, Va, gamma):
-  return J
+    state = x[:13]
+    mav._state = state
+    mav._update_velocity_data()
+    wrench = mav._forces_moments(x[13:])
 
+    f = mav._derivatives(state, wrench)
+    xd_star = np.array([0,0, Va*np.sin(gamma),0,0,0,0,0,0,0,0,0])
+    error = (xd_star - f)[2:]
+    J = np.linalg.norm(error)**2    
+    return J
+
+if __name__ == "__main__":
+    e = Euler2Quaternion([0, 0, 0])
+    state = np.array([0,      # (0)
+                       0,     # (1)
+                       -100,  # (2)
+                       25,    # (3)
+                       0,   # (4)
+                       0.1,     # (5)
+                       e[0],  # (6)
+                       e[1],  # (7)
+                       e[2],  # (8)
+                       e[3],  # (9)
+                       0,     # (10)
+                       0,     # (11)
+                       0])    # (12)
+    delta_e = 0
+    delta_t = 0.5
+    delta_a = 0
+    delta_r = 0
+    delta = np.array([delta_e, delta_t, delta_a, delta_r])
+
+    mav = mav_dynamics()
+    mav._state = state
+    mav._update_velocity_data()
+    wrench = mav._forces_moments(delta)
+
+    f = mav._derivatives(state, wrench)
+
+    print('wrench =', wrench)
+    print('f =', f)
