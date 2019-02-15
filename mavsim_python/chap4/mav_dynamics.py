@@ -15,7 +15,6 @@ from message_types.msg_state import msg_state
 import parameters.aerosonde_parameters as MAV
 from tools.tools import Quaternion2Rotation, Quaternion2Euler
 
-from IPython.core.debugger import Pdb
 np.set_printoptions(linewidth=100)
 
 class mav_dynamics:

@@ -12,8 +12,21 @@ from tools.tools import Euler2Quaternion
 
 def compute_trim(mav, Va, gamma):
     # define initial state and input
-    state0 =
-    delta0 =
+    e = Euler2Quaternion([0, gamma, 0])
+    state0 = np.array([0,    # (0)
+                       0,    # (1)
+                       mav._state[2],    # (2)
+                       Va,   # (3)
+                       0,    # (4)
+                       0,    # (5)
+                       e[0], # (6)
+                       e[1], # (7)
+                       e[2], # (8)
+                       e[3], # (9)
+                       0,    # (10)
+                       0,    # (11)
+                       0])   # (12)
+    delta0 = 
     x0 = np.concatenate((state0, delta0), axis=0)
     # define equality constraints
     cons = ({'type': 'eq',

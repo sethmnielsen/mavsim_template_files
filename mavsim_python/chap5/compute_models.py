@@ -1,7 +1,7 @@
 """
 compute_ss_model
     - Chapter 5 assignment for Beard & McLain, PUP, 2012
-    - Update history:  
+    - Update history:
         2/4/2019 - RWB
 """
 import sys
@@ -39,7 +39,7 @@ def f_euler(mav, x_euler, input):
 def df_dx(mav, x_euler, input):
     # take partial of f_euler with respect to x_euler
     return A
-
+    
 def df_du(mav, x_euler, delta):
     # take partial of f_euler with respect to delta
     return B
