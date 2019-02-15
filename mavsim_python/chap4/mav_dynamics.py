@@ -138,7 +138,6 @@ class mav_dynamics:
         e0_dot, e1_dot, e2_dot, e3_dot = 0.5*mat_rot @ np.array([e0,e1,e2,e3])
 
         # rotatonal dynamics
-        G = MAV.gamma
         G1 = MAV.gamma1
         G2 = MAV.gamma2
         G3 = MAV.gamma3
