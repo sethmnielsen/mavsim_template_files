@@ -78,4 +78,3 @@ def trim_objective(x, mav, Va, gamma):
     error = (xd_star - f)[2:]
     J = np.linalg.norm(error)**2    
     return J
-    

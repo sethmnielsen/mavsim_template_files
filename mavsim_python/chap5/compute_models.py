@@ -9,12 +9,22 @@ sys.path.append('..')
 import numpy as np
 from scipy.optimize import minimize
 from tools.tools import Euler2Quaternion, Quaternion2Euler
-from tools.transfer_function import transfer_function
+from control import TransferFunction as tfunc
 import parameters.aerosonde_parameters as MAV
 from parameters.simulation_parameters import ts_simulation as Ts
 
 def compute_tf_model(mav, trim_state, trim_input):
     # trim values
+    rho = MAV.rho
+    S = MAV.S_wing
+    Va = mav._Va
+    b = MAV.b
+    beta = mav._beta
+    alpha = mav._alpha
+    c = MAV.c
+    Jy = MAV.Jy
+
+    
 
     return T_phi_delta_a, T_chi_phi, T_theta_delta_e, T_h_theta, T_h_Va, T_Va_delta_t, T_Va_theta, T_beta_delta_r
 
