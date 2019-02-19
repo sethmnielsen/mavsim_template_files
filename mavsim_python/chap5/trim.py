@@ -62,8 +62,8 @@ def compute_trim(mav, Va, gamma):
     res = minimize(trim_objective, x0, method='SLSQP', args = (mav, Va, gamma),
                    constraints=cons, options={'ftol': 1e-10, 'disp': True})
     # extract trim state and input and return
-    trim_state = np.array([res.x[0:13]]).T
-    trim_input = np.array([res.x[13:17]]).T
+    trim_state = np.array(res.x[0:13])
+    trim_input = np.array(res.x[13:17])
     return trim_state, trim_input
 
 # objective function t o be minimized
@@ -74,7 +74,7 @@ def trim_objective(x, mav, Va, gamma):
     wrench = mav._forces_moments(x[13:])
 
     f = mav._derivatives(state, wrench)
-    xd_star = np.array([0,0, Va*np.sin(gamma),0,0,0,0,0,0,0,0,0])
+    xd_star = np.array([0,0, Va*np.sin(gamma),0,0,0,0,0,0,0,0,0,0])
     error = (xd_star - f)[2:]
     J = np.linalg.norm(error)**2    
     return J
