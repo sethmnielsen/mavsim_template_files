@@ -184,27 +184,9 @@ class mav_dynamics:
         dr = delta[3]
 
         # gravity
-        fg = self.R_vb @ np.array([0,0, MAV.mass * MAV.gravity])  #### CHECK
+        fg = self.R_vb @ np.array([0,0, MAV.mass * MAV.gravity])
 
-        # propeller thrust and torque
-        rho = MAV.rho
-        D = MAV.D_prop
-        Va = self._Va
-
-        V_in = MAV.V_max * dt
-        a = rho * D**5 * MAV.C_Q0 / (2*np.pi)**2
-        b = rho * D**4 * MAV.C_Q1 * Va / (2*np.pi) + MAV.KQ**2/MAV.R_motor
-        c = rho * D**3 * MAV.C_Q2 * Va**2 - (MAV.KQ * V_in) / MAV.R_motor + MAV.KQ*MAV.i0
-        Omega_op = (-b + np.sqrt(b**2 - 4*a*c)) / (2*a)
-
-        J_op = 2 * np.pi * Va / (Omega_op * D)
-        C_T = MAV.C_T2 * J_op**2 + MAV.C_T1 * J_op + MAV.C_T0
-        C_Q = MAV.C_Q2 * J_op**2 + MAV.C_Q1 * J_op + MAV.C_Q0
-        n = Omega_op / (2 * np.pi)
-        fp_x = rho * n**2 * D**4 * C_T
-        Mp_x = rho * n**2 * D**5 * C_Q
-        fp = np.array([fp_x,0,0])  # force from propeller
-        Mp = np.array([Mp_x,0,0])  # torque from propeller
+        fp, Mp = self._prop_thrust_torque(dt, self._Va)
 
         ## Aerodynamic forces/moments
         # Longitudinal
@@ -264,6 +246,30 @@ class mav_dynamics:
         self._forces[1] = fy
         self._forces[2] = fz
         return np.array([fx, fy, fz, Mx, My, Mz])
+
+    def _prop_thrust_torque(self, dt, Va):
+        # propeller thrust and torque
+        rho = MAV.rho
+        D = MAV.D_prop
+        Va = self._Va
+
+        V_in = MAV.V_max * dt
+        a = rho * D**5 * MAV.C_Q0 / (2*np.pi)**2
+        b = rho * D**4 * MAV.C_Q1 * Va / (2*np.pi) + MAV.KQ**2/MAV.R_motor
+        c = rho * D**3 * MAV.C_Q2 * Va**2 - \
+            (MAV.KQ * V_in) / MAV.R_motor + MAV.KQ*MAV.i0
+        Omega_op = (-b + np.sqrt(b**2 - 4*a*c)) / (2*a)
+
+        J_op = 2 * np.pi * Va / (Omega_op * D)
+        C_T = MAV.C_T2 * J_op**2 + MAV.C_T1 * J_op + MAV.C_T0
+        C_Q = MAV.C_Q2 * J_op**2 + MAV.C_Q1 * J_op + MAV.C_Q0
+        n = Omega_op / (2 * np.pi)
+        fp_x = rho * n**2 * D**4 * C_T
+        Mp_x = rho * n**2 * D**5 * C_Q
+        fp = np.array([fp_x, 0, 0])  # force from propeller
+        Mp = np.array([Mp_x, 0, 0])  # torque from propeller
+
+        return fp, Mp
 
     def _update_msg_true_state(self):
         # update the class structure for the true state:

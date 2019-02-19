@@ -12,6 +12,7 @@ from tools.tools import Euler2Quaternion, Quaternion2Euler
 from control import TransferFunction as TF
 import parameters.aerosonde_parameters as MAV
 from parameters.simulation_parameters import ts_simulation as Ts
+from chap4.mav_dynamics import mav_dynamics
 
 def compute_tf_model(mav, trim_state, trim_input):
     # trim values
@@ -24,6 +25,7 @@ def compute_tf_model(mav, trim_state, trim_input):
     c = MAV.c
     Jy = MAV.Jy
     g = MAV.gravity
+    mass = MAV.mass
 
     a_phi_1 = 0.5 * rho * (Va**2) * S * b * MAV.C_p_p * b/(2*Va)
     a_phi_2 = 0.5 * rho * (Va**2) * S * b * MAV.C_p_delta_a
@@ -46,40 +48,54 @@ def compute_tf_model(mav, trim_state, trim_input):
     T_h_Va = TF([theta], [1, 0])
 
     C_Ds = MAV.C_D_0 + MAV.C_D_alpha * alpha + MAV.C_D_delta_e * trim_input[0]
-    a_V1 = ((rho * Va * S * C_Ds) - dT_dVa(mav, Va, trim_input[1])) / MAV.mass
+    a_V1 = ((rho * Va * S * C_Ds) - dT_dVa(mav, Va, trim_input[1])) / mass
+    a_V2 = dT_ddelta_t(mav, Va, trim_input[1]) / mass
+    a_V3 = g * np.cos(theta - alpha)
+    T_Va_delta_t = TF([a_V2], [1, a_V1])
+    T_Va_theta = TF([-a_V3], [1, a_V1])
 
     return T_phi_delta_a, T_chi_phi, T_theta_delta_e, T_h_theta, T_h_Va, T_Va_delta_t, T_Va_theta, T_beta_delta_r
 
-def compute_ss_model(mav, trim_state, trim_input):
-     return A_lon, B_lon, A_lat, B_lat
+# def compute_ss_model(mav, trim_state, trim_input):
+     # return A_lon, B_lon, A_lat, B_lat
 
-def euler_state(x_quat):
-    # convert state x with attitude represented by quaternion
-    # to x_euler with attitude represented by Euler angles
-     return x_euler
+# def euler_state(x_quat):
+#     # convert state x with attitude represented by quaternion
+#     # to x_euler with attitude represented by Euler angles
+#      return x_euler
 
-def quaternion_state(x_euler):
-    # convert state x_euler with attitude represented by Euler angles
-    # to x_quat with attitude represented by quaternions
-    return x_quat
+# def quaternion_state(x_euler):
+#     # convert state x_euler with attitude represented by Euler angles
+#     # to x_quat with attitude represented by quaternions
+#     return x_quat
 
-def f_euler(mav, x_euler, input):
-    # return 12x1 dynamics (as if state were Euler state)
-    # compute f at euler_state
-    return f_euler_
+# def f_euler(mav, x_euler, input):
+#     # return 12x1 dynamics (as if state were Euler state)
+#     # compute f at euler_state
+#     return f_euler_
 
-def df_dx(mav, x_euler, input):
-    # take partial of f_euler with respect to x_euler
-    return A
+# def df_dx(mav, x_euler, input):
+#     # take partial of f_euler with respect to x_euler
+#     return A
     
-def df_du(mav, x_euler, delta):
-    # take partial of f_euler with respect to delta
-    return B
+# def df_du(mav, x_euler, delta):
+#     # take partial of f_euler with respect to delta
+#     return B
 
 def dT_dVa(mav, Va, delta_t):
     # returns the derivative of motor thrust with respect to Va
+    epsilon = 0.01
+    fp1, _ = mav._prop_thrust_torque(delta_t, Va - epsilon)
+    fp2, _ = mav._prop_thrust_torque(delta_t, Va + epsilon)
+    
+    dThrust = (fp2 - fp1) / (2*epsilon)
     return dThrust
 
 def dT_ddelta_t(mav, Va, delta_t):
     # returns the derivative of motor thrust with respect to delta_t
+    epsilon = 0.001
+    fp1, _ = mav._prop_thrust_torque(delta_t - epsilon, Va)
+    fp2, _ = mav._prop_thrust_torque(delta_t + epsilon, Va)
+    
+    dThrust = (fp2 - fp1) / (2*epsilon)
     return dThrust
