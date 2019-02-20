@@ -50,7 +50,7 @@ class mav_dynamics:
         self._alpha = 0
         self._beta = 0
         # initialize true_state message
-        self.msg_true_state = msg_state()
+        self.true_state = msg_state()
 
 
     ###################################
@@ -92,7 +92,7 @@ class mav_dynamics:
         self._update_velocity_data(wind)
 
         # update the message class for the true state
-        self._update_msg_true_state()
+        self._update_true_state()
 
     ###################################
     # private functions
@@ -216,9 +216,9 @@ class mav_dynamics:
         # Lateral
         b = MAV.b
         Va = self._Va
-        beta = self.msg_true_state.beta
-        p = self.msg_true_state.p
-        r = self.msg_true_state.r
+        beta = self.true_state.beta
+        p = self.true_state.p
+        r = self.true_state.r
         rho = MAV.rho
         S = MAV.S_wing
 
@@ -274,24 +274,24 @@ class mav_dynamics:
 
         return fp_x, Mp_x
 
-    def _update_msg_true_state(self):
+    def _update_true_state(self):
         # update the class structure for the true state:
         #   [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi, gyro_bx, gyro_by, gyro_bz]
         phi, theta, psi = Quaternion2Euler(self._state[6:10])
-        self.msg_true_state.pn = self._state[0]
-        self.msg_true_state.pe = self._state[1]
-        self.msg_true_state.h = -self._state[2]
-        self.msg_true_state.Va = self._Va
-        self.msg_true_state.alpha = self._alpha
-        self.msg_true_state.beta = self._beta
-        self.msg_true_state.phi = phi
-        self.msg_true_state.theta = theta
-        self.msg_true_state.psi = psi
-        self.msg_true_state.Vg = np.linalg.norm(self._state[3:6])
-        self.msg_true_state.gamma = np.arctan2(-self._state[5], self._state[3])
-        self.msg_true_state.chi = np.arctan2(self._state[4], self._state[3]) + psi
-        self.msg_true_state.p = self._state[10]
-        self.msg_true_state.q = self._state[11]
-        self.msg_true_state.r = self._state[12]
-        self.msg_true_state.wn = self._wind[0]
-        self.msg_true_state.we = self._wind[1]
+        self.true_state.pn = self._state[0]
+        self.true_state.pe = self._state[1]
+        self.true_state.h = -self._state[2]
+        self.true_state.Va = self._Va
+        self.true_state.alpha = self._alpha
+        self.true_state.beta = self._beta
+        self.true_state.phi = phi
+        self.true_state.theta = theta
+        self.true_state.psi = psi
+        self.true_state.Vg = np.linalg.norm(self._state[3:6])
+        self.true_state.gamma = np.arctan2(-self._state[5], self._state[3])
+        self.true_state.chi = np.arctan2(self._state[4], self._state[3]) + psi
+        self.true_state.p = self._state[10]
+        self.true_state.q = self._state[11]
+        self.true_state.r = self._state[12]
+        self.true_state.wn = self._wind[0]
+        self.true_state.we = self._wind[1]

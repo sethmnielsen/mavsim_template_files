@@ -10,6 +10,7 @@ import numpy as np
 from scipy.optimize import minimize
 from tools.tools import Euler2Quaternion
 from chap4.mav_dynamics import mav_dynamics
+import pickle as pkl
 
 def compute_trim(mav, Va, gamma):
     # define initial state and input
@@ -64,6 +65,7 @@ def compute_trim(mav, Va, gamma):
     # extract trim state and input and return
     trim_state = np.array(res.x[0:13])
     trim_input = np.array(res.x[13:17])
+
     return trim_state, trim_input
 
 # objective function to be minimized
@@ -76,5 +78,5 @@ def trim_objective(x, mav, Va, gamma):
     f = mav._derivatives(state, wrench)
     xd_star = np.array([0,0, Va*np.sin(gamma),0,0,0,0,0,0,0,0,0,0])
     error = (xd_star - f)[2:]
-    J = np.linalg.norm(error)**2    
+    J = np.linalg.norm(error)**2
     return J

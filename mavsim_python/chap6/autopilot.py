@@ -55,12 +55,12 @@ class autopilot:
     def update(self, cmd, state):
 
         # lateral autopilot
-        phi_c = 
-        delta_a =
+        phi_c = np.deg2rad(15)  # deg
+        delta_a = 
         delta_r =
 
         # longitudinal autopilot
-        h_c =
+        h_c = 
         theta_c =
         delta_e =
         delta_t =

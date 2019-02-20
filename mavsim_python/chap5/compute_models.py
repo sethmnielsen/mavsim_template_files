@@ -55,6 +55,19 @@ def compute_tf_model(mav, trim_state, trim_input):
     T_Va_delta_t = TF([a_V2], [1, a_V1])
     T_Va_theta = TF([-a_V3], [1, a_V1])
 
+    data = []
+    with open("trim_conditions.pkl", 'wb') as f:
+        data = [trim_state, trim_input, a_phi_1, a_phi_2,
+                a_beta1, a_beta2, a_theta1, a_theta2, a_theta3]
+        pkl.dump(data, f)
+
+
+    with open("trim_conditions.pkl", 'rb') as f:
+        data = pkl.load(f)
+
+    for i in range(9):
+        print('Data[i]\n', data[i])
+
     return T_phi_delta_a, T_chi_phi, T_theta_delta_e, T_h_theta, T_h_Va, T_Va_delta_t, T_Va_theta, T_beta_delta_r
 
 def dT_dVa(mav, Va, delta_t):

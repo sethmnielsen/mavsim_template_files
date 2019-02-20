@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 import numpy as np
-import chap5.transfer_function_coef as TF
+# import chap5.transfer_function_coef as TF
 
 gravity = 9.8
 sigma = 2.0
@@ -9,7 +9,7 @@ Va0 = 17
 
 #----------roll loop-------------
 roll_kp = 1.0
-roll_kd = 1.0
+roll_kd = 0.1
 
 # ----------course loop-------------
 # course_kp =

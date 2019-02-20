@@ -47,7 +47,7 @@ class wind_simulation:
         #                              Ts=Ts)
 
 
-    def update(self, Va):
+    def update(self, Va=MAV.u0):
         # returns a six vector.
         #   The first three elements are the steady state wind in the inertial frame
         #   The second three elements are the gust in the body frame
