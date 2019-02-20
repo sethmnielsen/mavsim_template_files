@@ -5,6 +5,7 @@ process to represent wind gusts. (Follows section 4.4 in uav book)
 """
 import sys
 sys.path.append('..')
+from tools.transfer_function import transfer_function
 import numpy as np
 import parameters.aerosonde_parameters as MAV
 from IPython.core.debugger import Pdb
@@ -25,9 +26,6 @@ class wind_simulation:
         self.Lv = self.Lu
         self.Lw = 50.0
 
-        #   Dryden gust model parameters (pg 56 UAV book)
-        # HACK:  Setting Va to a constant value is a hack.  We set a nominal airspeed for the gust model.
-        # Could pass current Va into the gust function and recalculate A and C matrices.
         self.Va = MAV.u0
         self._A = self._compute_A()
         self._B = np.array([[1, 0, 0],
@@ -37,6 +35,17 @@ class wind_simulation:
                             [0, 0, 0]])
         self._C = self._compute_C()
         self._gust_state = np.zeros(5)
+        self._steady_state =
+
+        # self.u_w = transfer_function(num=np.array([[a1]]),
+        #                              den=np.array([[1, b1]]),
+        #                              Ts=Ts)
+        # self.v_w = transfer_function(num=np.array([[a2, a3]]),
+        #                              den=np.array([[1, 2*b2, b2**2.0]]),
+        #                              Ts=Ts)
+        # self.w_w = transfer_function(num=np.array([[a4, a5]]),
+        #                              den=np.array([[1, 2*b3, b3**2.0]]),
+        #                              Ts=Ts)
         self._Ts = Ts
 
 
@@ -44,6 +53,7 @@ class wind_simulation:
         # returns a six vector.
         #   The first three elements are the steady state wind in the inertial frame
         #   The second three elements are the gust in the body frame
+<<<<<<< HEAD
         self.Va = Va
         return np.concatenate(( self._steady_state, self._gust() ))
 
@@ -70,3 +80,11 @@ class wind_simulation:
         self._gust_state += self._Ts * (self._A @ self._gust_state + self._B @ w)
         # output the current gust: y[k] = C x[k]
         return self._C @ self._gust_state
+=======
+        gust = np.array([[self.u_w.update(np.random.randn())],
+                         [self.v_w.update(np.random.randn())],
+                         [self.w_w.update(np.random.randn())]])
+        #gust = np.array([[0.],[0.],[0.]])
+        return np.concatenate(( self._steady_state, gust ))
+
+>>>>>>> 6020aeeaf9783e960ac0fb84218c04e8485b8091

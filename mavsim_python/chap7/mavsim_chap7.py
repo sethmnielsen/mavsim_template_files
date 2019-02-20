@@ -1,8 +1,8 @@
 """
 mavsim_python
-    - Chapter 6 assignment for Beard & McLain, PUP, 2012
+    - Chapter 7 assignment for Beard & McLain, PUP, 2012
     - Last Update:
-        2/5/2019 - RWB
+        2/16/2019 - RWB
 """
 import sys
 sys.path.append('..')
@@ -11,9 +11,9 @@ import parameters.simulation_parameters as SIM
 
 from chap2.mav_viewer import mav_viewer
 from chap3.data_viewer import data_viewer
-from chap4.mav_dynamics import mav_dynamics
 from chap4.wind_simulation import wind_simulation
 from chap6.autopilot import autopilot
+from chap7.mav_dynamics import mav_dynamics
 from tools.signals import signals
 
 # initialize the visualization
@@ -22,7 +22,7 @@ mav_view = mav_viewer()  # initialize the mav viewer
 data_view = data_viewer()  # initialize view of data plots
 if VIDEO == True:
     from chap2.video_writer import video_writer
-    video = video_writer(video_name="chap6_video.avi",
+    video = video_writer(video_name="chap7_video.avi",
                          bounding_box=(0, 0, 1000, 1000),
                          output_rate=SIM.ts_video)
 
@@ -45,21 +45,24 @@ sim_time = SIM.start_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
 
-    #-------controller-------------
-    estimated_state = mav.true_state  # uses true states in the control
+    #-------autopilot commands-------------
     commands.airspeed_command = Va_command.square(sim_time)
     commands.course_command = chi_command.square(sim_time)
     commands.altitude_command = h_command.square(sim_time)
+
+    #-------controller-------------
+    estimated_state = mav.true_state  # uses true states in the control
     delta, commanded_state = ctrl.update(commands, estimated_state)
 
     #-------physical system-------------
     current_wind = wind.update()  # get the new wind vector
     mav.update_state(delta, current_wind)  # propagate the MAV dynamics
+    mav.update_sensors()  # update the sensors
 
     #-------update viewer-------------
     mav_view.update(mav.true_state)  # plot body of MAV
     data_view.update(mav.true_state, # true states
-                     mav.true_state, # estimated states
+                     estimated_state, # estimated states
                      commanded_state, # commanded states
                      SIM.ts_simulation)
     if VIDEO == True: video.update(sim_time)
