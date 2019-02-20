@@ -10,6 +10,7 @@ sys.path.append('..')
 import parameters.control_parameters as AP
 from chap6.pid_control import pid_control, pi_control, pd_control_with_rate
 from message_types.msg_state import msg_state
+from control import TransferFunction as TF
 
 
 class autopilot:
@@ -29,10 +30,10 @@ class autopilot:
                         ki=AP.sideslip_ki,
                         Ts=ts_control,
                         limit=np.radians(45))
-        self.yaw_damper = transfer_function(
-                        num=np.array([[AP.yaw_damper_kp, 0]]),
-                        den=np.array([[1, 1/AP.yaw_damper_tau_r]]),
-                        Ts=ts_control)
+        self.yaw_damper = TF(
+                        num=np.array([AP.yaw_damper_kp, 0]),
+                        den=np.array([1, 1/AP.yaw_damper_tau_r]),
+                        dt=ts_control)
 
         # instantiate lateral controllers
         self.pitch_from_elevator = pd_control_with_rate(
@@ -54,7 +55,7 @@ class autopilot:
     def update(self, cmd, state):
 
         # lateral autopilot
-        phi_c =
+        phi_c = 
         delta_a =
         delta_r =
 

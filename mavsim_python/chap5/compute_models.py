@@ -57,6 +57,24 @@ def compute_tf_model(mav, trim_state, trim_input):
 
     return T_phi_delta_a, T_chi_phi, T_theta_delta_e, T_h_theta, T_h_Va, T_Va_delta_t, T_Va_theta, T_beta_delta_r
 
+def dT_dVa(mav, Va, delta_t):
+    # returns the derivative of motor thrust with respect to Va
+    epsilon = 0.01
+    fp1, _ = mav._prop_thrust_torque(delta_t, Va - epsilon)
+    fp2, _ = mav._prop_thrust_torque(delta_t, Va + epsilon)
+    
+    dThrust = (fp2 - fp1) / (2*epsilon)
+    return dThrust
+
+def dT_ddelta_t(mav, Va, delta_t):
+    # returns the derivative of motor thrust with respect to delta_t
+    epsilon = 0.001
+    fp1, _ = mav._prop_thrust_torque(delta_t - epsilon, Va)
+    fp2, _ = mav._prop_thrust_torque(delta_t + epsilon, Va)
+    
+    dThrust = (fp2 - fp1) / (2*epsilon)
+    return dThrust
+
 # def compute_ss_model(mav, trim_state, trim_input):
      # return A_lon, B_lon, A_lat, B_lat
 
@@ -82,21 +100,3 @@ def compute_tf_model(mav, trim_state, trim_input):
 # def df_du(mav, x_euler, delta):
 #     # take partial of f_euler with respect to delta
 #     return B
-
-def dT_dVa(mav, Va, delta_t):
-    # returns the derivative of motor thrust with respect to Va
-    epsilon = 0.01
-    fp1, _ = mav._prop_thrust_torque(delta_t, Va - epsilon)
-    fp2, _ = mav._prop_thrust_torque(delta_t, Va + epsilon)
-    
-    dThrust = (fp2 - fp1) / (2*epsilon)
-    return dThrust
-
-def dT_ddelta_t(mav, Va, delta_t):
-    # returns the derivative of motor thrust with respect to delta_t
-    epsilon = 0.001
-    fp1, _ = mav._prop_thrust_torque(delta_t - epsilon, Va)
-    fp2, _ = mav._prop_thrust_torque(delta_t + epsilon, Va)
-    
-    dThrust = (fp2 - fp1) / (2*epsilon)
-    return dThrust
