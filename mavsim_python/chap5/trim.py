@@ -66,7 +66,7 @@ def compute_trim(mav, Va, gamma):
     trim_input = np.array(res.x[13:17])
     return trim_state, trim_input
 
-# objective function t o be minimized
+# objective function to be minimized
 def trim_objective(x, mav, Va, gamma):
     state = x[:13]
     mav._state = state

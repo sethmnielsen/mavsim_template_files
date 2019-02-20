@@ -37,7 +37,7 @@ Va = 25.
 gamma = 0.*np.pi/180.
 trim_state, trim_input = compute_trim(mav, Va, gamma)
 mav._state = trim_state  # set the initial state of the mav to the trim state
-delta = trim_input  # set input to constant constant trim input
+delta = np.copy(trim_input)  # set input to constant constant trim input
 
 # # compute the state space model linearized about trim
 # A_lon, B_lon, A_lat, B_lat = compute_ss_model(mav, trim_state, trim_input)
@@ -54,7 +54,7 @@ while sim_time < SIM.end_time:
 
     #-------physical system-------------
     #current_wind = wind.update()  # get the new wind vector
-    current_wind = np.zeros((6,1))
+    current_wind = np.zeros(6)
     mav.update_state(delta, current_wind)  # propagate the MAV dynamics
 
     #-------update viewer-------------
