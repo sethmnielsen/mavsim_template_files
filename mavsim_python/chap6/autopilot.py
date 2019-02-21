@@ -31,9 +31,9 @@ class autopilot:
                         Ts=ts_control,
                         limit=np.radians(45))
         self.yaw_damper = TF(
-                        num=np.array([AP.yaw_damper_kp, 0]),
-                        den=np.array([1, 1/AP.yaw_damper_tau_r]),
-                        dt=ts_control)
+                        np.array([AP.yaw_damper_kp, 0]),
+                        np.array([1, 1/AP.yaw_damper_tau_r]),
+                        ts_control)
 
         # instantiate lateral controllers
         self.pitch_from_elevator = pd_control_with_rate(
@@ -55,22 +55,24 @@ class autopilot:
     def update(self, cmd, state):
 
         # lateral autopilot
-        phi_c = np.deg2rad(15)  # deg
-        delta_a = 
-        delta_r =
+        phi_c = np.deg2rad(15)  # roll
+        # delta_a = 
+        # delta_r =
 
         # longitudinal autopilot
-        h_c = 
-        theta_c =
-        delta_e =
-        delta_t =
+        # h_c = 20
+        # theta_c = 
+        # delta_e =
+        # delta_t =
 
         # construct output and commanded states
-        delta = np.array([[delta_e], [delta_a], [delta_r], [delta_t]])
+        # delta = np.array([delta_e, delta_a, delta_r, delta_t])
+        delta = np.array(AP.deltas_trim)
         self.commanded_state.h = cmd.altitude_command
         self.commanded_state.Va = cmd.airspeed_command
         self.commanded_state.phi = phi_c
-        self.commanded_state.theta = theta_c
+        # self.commanded_state.theta = theta_c
+        self.commanded_state.theta = 0
         self.commanded_state.chi = cmd.course_command
         return delta, self.commanded_state
 

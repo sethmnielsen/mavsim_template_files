@@ -29,10 +29,10 @@ def compute_trim(mav, Va, gamma):
                        0,    # (11)
                        0])   # (12)
     delta_e = 0
-    delta_t = 0.5
     delta_a = 0
     delta_r = 0
-    delta0 = np.array([delta_e, delta_t, delta_a, delta_r])
+    delta_t = 0.5
+    delta0 = np.array([delta_e, delta_a, delta_r, delta_t])
 
     x0 = np.concatenate((state0, delta0), axis=0)
     # define equality constraints
