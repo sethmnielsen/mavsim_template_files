@@ -35,7 +35,7 @@ class autopilot:
                         np.array([1, 1/AP.yaw_damper_tau_r]),
                         ts_control)
 
-        # instantiate lateral controllers
+        # instantiate longitudinal controllers
         self.pitch_from_elevator = pd_control_with_rate(
                         kp=AP.pitch_kp,
                         kd=AP.pitch_kd,
