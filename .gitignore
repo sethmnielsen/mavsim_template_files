@@ -2,7 +2,7 @@
 *.pyc
 *__pycache__
 *.swp
-*.vscode
+
 
 mavsim_matlab
 mavsim_simulink
