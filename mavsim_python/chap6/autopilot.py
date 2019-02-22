@@ -58,10 +58,10 @@ class autopilot:
         phi_c = np.deg2rad(15)  # roll
         # delta_a = 
         # delta_r =
-
+        
         # longitudinal autopilot
         # h_c = 20
-        # theta_c = 
+        # theta_c =
         # delta_e =
         # delta_t =
 
