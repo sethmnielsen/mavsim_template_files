@@ -15,7 +15,7 @@ with open("trim.pkl", 'rb') as f:
 deltas_trim = data[1]
 
 #----------roll loop-------------
-roll_kp = 1.0
+roll_kp = 1.5
 roll_kd = 0.1
 
 # ----------course loop-------------

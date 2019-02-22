@@ -56,7 +56,8 @@ class autopilot:
 
         # lateral autopilot
         phi_c = np.deg2rad(15)  # roll
-        # delta_a = 
+        delta_a = self.roll_from_aileron.update(phi_c, state.phi, state.p)
+        print(state.phi)
         # delta_r =
         
         # longitudinal autopilot
@@ -67,7 +68,10 @@ class autopilot:
 
         # construct output and commanded states
         # delta = np.array([delta_e, delta_a, delta_r, delta_t])
-        delta = np.array(AP.deltas_trim)
+        # print('type:', type(AP.deltas_trim))
+        # print(AP.deltas_trim)
+        # delta = np.array(AP.deltas_trim)
+        delta = np.array([AP.deltas_trim[0], delta_a, AP.deltas_trim[2], .25])
         self.commanded_state.h = cmd.altitude_command
         self.commanded_state.Va = cmd.airspeed_command
         self.commanded_state.phi = phi_c
