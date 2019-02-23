@@ -54,11 +54,11 @@ while sim_time < SIM.end_time:
     mav.update_state(delta, current_wind)  # propagate the MAV dynamics
 
     #-------update viewer-------------
-    mav_view.update(mav.msg_true_state)  # plot body of MAV
+    mav_view.update(mav.true_state)  # plot body of MAV
     if DATA:
-        data_view.update(mav.msg_true_state, # true states
-                         mav.msg_true_state, # estimated states
-                         mav.msg_true_state, # commanded states
+        data_view.update(mav.true_state, # true states
+                         mav.true_state, # estimated states
+                         mav.true_state, # commanded states
                          SIM.ts_simulation)
     if VIDEO == True:
         video.update(sim_time)

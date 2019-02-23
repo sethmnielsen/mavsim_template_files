@@ -19,7 +19,9 @@ from message_types.msg_autopilot import msg_autopilot
 
 # initialize the visualization
 mav_view = mav_viewer()  # initialize the mav viewer
-data_view = data_viewer()  # initialize view of data plots
+DATA = False
+if DATA:
+    data_view = data_viewer()  # initialize view of data plots
 
 # initialize elements of the architecture
 wind = wind_simulation(SIM.ts_simulation)
@@ -52,10 +54,11 @@ while sim_time < SIM.end_time:
 
     #-------update viewer-------------
     mav_view.update(mav.true_state)  # plot body of MAV
-    data_view.update(mav.true_state, # true states
-                     mav.true_state, # estimated states
-                     commanded_state, # commanded states
-                     SIM.ts_simulation)
+    if DATA:
+        data_view.update(mav.true_state, # true states
+                        mav.true_state, # estimated states
+                        commanded_state, # commanded states
+                        SIM.ts_simulation)
 
     #-------increment time-------------
     sim_time += SIM.ts_simulation

@@ -184,7 +184,7 @@ class mav_dynamics:
         dr = delta[3]
 
         # gravity
-        fg = self.R_vb @ np.array([0,0, MAV.mass * MAV.gravity])
+        fg = self.R_vb.T @ np.array([0,0, MAV.mass * MAV.gravity])
 
         thrust, torque = self._prop_thrust_torque(dt, self._Va)
         fp = np.array([thrust, 0, 0])

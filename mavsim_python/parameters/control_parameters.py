@@ -6,7 +6,7 @@ import pickle as pkl
 
 gravity = 9.8
 sigma = 2.0
-Va0 = 17
+Va0 = 25
 
 data = []
 with open("trim.pkl", 'rb') as f:
@@ -15,7 +15,7 @@ with open("trim.pkl", 'rb') as f:
 deltas_trim = data[1]
 
 #----------roll loop-------------
-roll_kp = 1.5
+roll_kp = 5.0
 roll_kd = 0.1
 
 # ----------course loop-------------
