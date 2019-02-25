@@ -76,7 +76,7 @@ def trim_objective(x, mav, Va, gamma):
     wrench = mav._forces_moments(x[13:])
 
     f = mav._derivatives(state, wrench)
-    xd_star = np.array([0,0, Va*np.sin(gamma),0,0,0,0,0,0,0,0,0,0])
+    xd_star = np.array([0,0, -Va*np.sin(gamma),0,0,0,0,0,0,0,0,0,0])
     error = (xd_star - f)[2:]
     J = np.linalg.norm(error)**2
     return J

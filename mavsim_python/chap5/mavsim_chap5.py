@@ -21,14 +21,16 @@ from chap5.compute_models import compute_tf_model
 
 # initialize the visualization
 mav_view = mav_viewer()  # initialize the mav viewer
-data_view = data_viewer()  # initialize view of data plots
+DATA = False
+if DATA:
+    data_view = data_viewer()  # initialize view of data plots
 
 # initialize elements of the architecture
 wind = wind_simulation(SIM.ts_simulation)
 mav = mav_dynamics(SIM.ts_simulation)
 
 # use compute_trim function to compute trim state and trim input
-Va = 25
+Va = 25.
 gamma = 0.*np.pi/180.
 trim_state, trim_input = compute_trim(mav, Va, gamma)
 mav._state = trim_state  # set the initial state of the mav to the trim state
@@ -56,14 +58,13 @@ while sim_time < SIM.end_time:
 
     #-------update viewer-------------
     mav_view.update(mav.true_state)  # plot body of MAV
-    data_view.update(mav.true_state, # true states
-                     mav.true_state, # estimated states
-                     mav.true_state, # commanded states
-                     SIM.ts_simulation)
+    if DATA:
+        data_view.update(mav.true_state, # true states
+                            mav.true_state, # estimated states
+                            mav.true_state, # commanded states
+                            SIM.ts_simulation)
 
     #-------increment time-------------
     sim_time += SIM.ts_simulation
 
-
-
-
+print

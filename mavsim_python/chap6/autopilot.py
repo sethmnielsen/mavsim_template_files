@@ -16,16 +16,16 @@ from control import TransferFunction as TF
 class autopilot:
     def __init__(self, ts_control):
         # instantiate lateral controllers
-        self.roll_from_aileron = pd_control_with_rate(
+        self.roll_to_aileron = pd_control_with_rate(
                         kp=AP.roll_kp,
                         kd=AP.roll_kd,
                         limit=np.radians(45))
-        self.course_from_roll = pi_control(
+        self.course_to_roll = pi_control(
                         kp=AP.course_kp,
                         ki=AP.course_ki,
                         Ts=ts_control,
                         limit=np.radians(30))
-        self.sideslip_from_rudder = pi_control(
+        self.sideslip_to_rudder = pi_control(
                         kp=AP.sideslip_kp,
                         ki=AP.sideslip_ki,
                         Ts=ts_control,
@@ -36,16 +36,16 @@ class autopilot:
                         ts_control)
 
         # instantiate longitudinal controllers
-        self.pitch_from_elevator = pd_control_with_rate(
+        self.pitch_to_elevator = pd_control_with_rate(
                         kp=AP.pitch_kp,
                         kd=AP.pitch_kd,
                         limit=np.radians(45))
-        self.altitude_from_pitch = pi_control(
+        self.altitude_to_pitch = pi_control(
                         kp=AP.altitude_kp,
                         ki=AP.altitude_ki,
                         Ts=ts_control,
                         limit=np.radians(30))
-        self.airspeed_from_throttle = pi_control(
+        self.airspeed_to_throttle = pi_control(
                         kp=AP.airspeed_throttle_kp,
                         ki=AP.airspeed_throttle_ki,
                         Ts=ts_control,
@@ -55,9 +55,9 @@ class autopilot:
     def update(self, cmd, state):
 
         # lateral autopilot
-        phi_c = np.deg2rad(15)  # roll
-        delta_a = self.roll_from_aileron.update(phi_c, state.phi, state.p)
-        # print(state.phi)
+        # phi_c = np.deg2rad(0)  # roll
+        phi_c = self.course_to_roll.update(cmd.course_command, state.chi)
+        delta_a = self.roll_to_aileron.update(phi_c, state.phi, state.p)
         # delta_r =
         
         # longitudinal autopilot

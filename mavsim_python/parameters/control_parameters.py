@@ -19,8 +19,8 @@ roll_kp = 5.0
 roll_kd = 0.1
 
 # ----------course loop-------------
-course_kp = 1.0
-course_ki = 0
+course_kp = 5.0
+course_ki = 0.01
 
 # ----------sideslip loop-------------
 sideslip_ki = 0

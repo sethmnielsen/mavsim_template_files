@@ -179,9 +179,9 @@ class mav_dynamics:
         :return: Forces and Moments on the UAV np.matrix(Fx, Fy, Fz, Ml, Mn, Mm)
         """
         de = delta[0]
-        dt = delta[1]
-        da = delta[2]
-        dr = delta[3]
+        da = delta[1]
+        dr = delta[2]
+        dt = delta[3]
 
         # gravity
         fg = self.R_vb.T @ np.array([0,0, MAV.mass * MAV.gravity])
