@@ -13,7 +13,7 @@
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },
-            "console": "none",
+            "console": "integratedTerminal",
             "debugStdLib": true
         },
         {

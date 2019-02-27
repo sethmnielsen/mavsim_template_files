@@ -2,7 +2,10 @@ import sys
 sys.path.append('..')
 import numpy as np
 import pickle as pkl
+import parameters.simulation_parameters as SP
 # import chap5.transfer_function_coef as TF
+
+ts_control = SP.ts_control
 
 gravity = 9.8
 sigma = 2.0
@@ -31,15 +34,15 @@ yaw_damper_tau_r = 1.0
 yaw_damper_kp = 1.0
 
 # ----------pitch loop-------------
-pitch_kp = 1.0
+pitch_kp = 0.1
 pitch_kd = 0.1
 K_theta_DC = 1.0
 
 # ----------altitude loop-------------
-altitude_kp = 1.0
-altitude_ki = 0
-altitude_zone = 1
+altitude_kp = 0.1
+altitude_ki = 0.01
+altitude_zone = 3
 
 # ---------airspeed hold using throttle---------------
-airspeed_throttle_kp = 1.0
-airspeed_throttle_ki = 0
+airspeed_throttle_kp = 0.7
+airspeed_throttle_ki = 0.1

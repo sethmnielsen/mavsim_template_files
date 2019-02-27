@@ -61,22 +61,27 @@ class autopilot:
         # delta_r =
         
         # longitudinal autopilot
-        # h_c = 20
-        # theta_c =
-        # delta_e =
-        # delta_t =
+        theta_c = self.altitude_to_pitch.update(cmd.altitude_command, state.h)
+        # print('\ncmd:', cmd.altitude_command)
+        # print('alt:', state.h)
+        delta_e = -self.pitch_to_elevator.update(theta_c, state.theta, state.q)
+        delta_t = self.airspeed_to_throttle.update(cmd.airspeed_command, state.Va)
+        if delta_t < 0:
+            delta_t = 0
+        print('\ncmd:', cmd.airspeed_command)
+        print('Va :', state.Va)
+        print('dt :', delta_t)
 
         # construct output and commanded states
         # delta = np.array([delta_e, delta_a, delta_r, delta_t])
         # print('type:', type(AP.deltas_trim))
         # print(AP.deltas_trim)
         # delta = np.array(AP.deltas_trim)
-        delta = np.array([AP.deltas_trim[0], delta_a, AP.deltas_trim[2], AP.deltas_trim[3]])
+        delta = np.array([delta_e, delta_a, AP.deltas_trim[2], delta_t])
         self.commanded_state.h = cmd.altitude_command
         self.commanded_state.Va = cmd.airspeed_command
         self.commanded_state.phi = phi_c
-        # self.commanded_state.theta = theta_c
-        self.commanded_state.theta = 0
+        self.commanded_state.theta = theta_c
         self.commanded_state.chi = cmd.course_command
         return delta, self.commanded_state
 
