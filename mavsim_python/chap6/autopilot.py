@@ -59,20 +59,18 @@ class autopilot:
         # delta_r =
         
         # longitudinal autopilot
-        if state.h < 99.0:
-            b = 5
         theta_c = self.altitude_to_pitch.update(cmd.altitude_command, state.h)
         delta_e = self.pitch_to_elevator.update(theta_c, state.theta, state.q)
 
         delta_t = self.airspeed_to_throttle.update(cmd.airspeed_command, state.Va)
-        delta_t = 1.0
-        # if delta_t < 0:
-            # delta_t = 0
+        delta_t = self.saturate(delta_t, 0, 1.0)
         
-        print('\ncmd alt:', cmd.altitude_command)
+        print('\nVa   :', state.Va)
+        print('cmd alt:', cmd.altitude_command)
         print('alt    :', state.h)
         print('theta_c:', theta_c)
         print('theta  :', state.theta)
+        print('delta_e:', delta_e)
 
         # construct output and commanded states
         # delta = np.array([delta_e, delta_a, delta_r, delta_t])

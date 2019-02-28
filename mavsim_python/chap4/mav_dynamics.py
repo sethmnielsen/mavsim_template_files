@@ -65,6 +65,7 @@ class mav_dynamics:
         # Pdb().set_trace()
 
         self._wind = wind[:3]
+        self.R_vb = Quaternion2Rotation(self._state[6:10])
 
         # get forces and moments acting on rigid bod
         forces_moments = self._forces_moments(delta)
@@ -159,7 +160,7 @@ class mav_dynamics:
         return x_dot
 
     def _update_velocity_data(self, wind=np.zeros(6)):
-        self.R_vb = Quaternion2Rotation(self._state[6:10])
+        # self.R_vb = Quaternion2Rotation(self._state[6:10])
 
         # compute airspeed
         V_wb = self.R_vb @ wind[:3] + wind[3:]

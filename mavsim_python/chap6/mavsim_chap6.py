@@ -19,7 +19,7 @@ from message_types.msg_autopilot import msg_autopilot
 
 # initialize the visualization
 mav_view = mav_viewer()  # initialize the mav viewer
-DATA = False
+DATA = True
 if DATA:
     data_view = data_viewer()  # initialize view of data plots
 
@@ -31,7 +31,7 @@ ctrl = autopilot(SIM.ts_simulation)
 # autopilot commands
 commands = msg_autopilot()
 Va_command = signals(dc_offset=25.0, amplitude=0.0, start_time=2.0, frequency = 0.1)
-h_command = signals(dc_offset=100.0, amplitude=0.0, start_time=0.0, frequency = 0.1)
+h_command = signals(dc_offset=100.0, amplitude=10.0, start_time=0.0, frequency = 0.05)
 # chi_command = signals(dc_offset=np.radians(180), amplitude=np.radians(45), start_time=5.0, frequency = 0.015)
 chi_command = signals(dc_offset=np.radians(180), amplitude=np.radians(45), start_time=5.0, frequency = 0.1)
 
