@@ -89,8 +89,8 @@ class pi_control:
         u_sat = self._saturate(u_unsat)
 
         # Anti-windup
-        if self.ki != 0:
-            self.integrator += self.Ts/self.ki*(u_sat-u_unsat)
+        # if self.ki != 0:
+            # self.integrator += self.Ts/self.ki*(u_sat-u_unsat)
             
         return u_sat
 

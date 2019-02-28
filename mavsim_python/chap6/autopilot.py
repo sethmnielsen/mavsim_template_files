@@ -60,12 +60,13 @@ class autopilot:
         
         # longitudinal autopilot
         theta_c = self.altitude_to_pitch.update(cmd.altitude_command, state.h)
-        # print('\ncmd:', cmd.altitude_command)
-        # print('alt:', state.h)
-        delta_e = -self.pitch_to_elevator.update(theta_c, state.theta, state.q)
+        delta_e = self.pitch_to_elevator.update(theta_c, state.theta, state.q)
+
         delta_t = self.airspeed_to_throttle.update(cmd.airspeed_command, state.Va)
-        if delta_t < 0:
-            delta_t = 0
+        delta_t = 1.0
+        # if delta_t < 0:
+            # delta_t = 0
+        
         print('\ncmd alt:', cmd.altitude_command)
         print('alt    :', state.h)
         print('theta_c:', theta_c)

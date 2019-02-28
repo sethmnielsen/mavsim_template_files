@@ -34,15 +34,15 @@ yaw_damper_tau_r = 1.0
 yaw_damper_kp = 1.0
 
 # ----------pitch loop-------------
-pitch_kp = 0.1
+pitch_kp = 0.5
 pitch_kd = 0.1
 K_theta_DC = 1.0
 
 # ----------altitude loop-------------
-altitude_kp = 0.8
-altitude_ki = 0.01
+altitude_kp = 0.05
+altitude_ki = 0.0
 altitude_zone = 3
 
 # ---------airspeed hold using throttle---------------
 airspeed_throttle_kp = 0.7
-airspeed_throttle_ki = 0.1
+airspeed_throttle_ki = 0.05
