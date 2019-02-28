@@ -53,9 +53,7 @@ class autopilot:
         self.commanded_state = msg_state()
 
     def update(self, cmd, state):
-
         # lateral autopilot
-        # phi_c = np.deg2rad(0)  # roll
         phi_c = self.course_to_roll.update(cmd.course_command, state.chi)
         delta_a = self.roll_to_aileron.update(phi_c, state.phi, state.p)
         # delta_r =
@@ -68,9 +66,10 @@ class autopilot:
         delta_t = self.airspeed_to_throttle.update(cmd.airspeed_command, state.Va)
         if delta_t < 0:
             delta_t = 0
-        print('\ncmd:', cmd.airspeed_command)
-        print('Va :', state.Va)
-        print('dt :', delta_t)
+        print('\ncmd alt:', cmd.altitude_command)
+        print('alt    :', state.h)
+        print('theta_c:', theta_c)
+        print('theta  :', state.theta)
 
         # construct output and commanded states
         # delta = np.array([delta_e, delta_a, delta_r, delta_t])

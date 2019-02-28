@@ -39,7 +39,7 @@ pitch_kd = 0.1
 K_theta_DC = 1.0
 
 # ----------altitude loop-------------
-altitude_kp = 0.1
+altitude_kp = 0.8
 altitude_ki = 0.01
 altitude_zone = 3
 
