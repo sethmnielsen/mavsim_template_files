@@ -59,6 +59,8 @@ class autopilot:
         # delta_r =
         
         # longitudinal autopilot
+        if state.h < 99.0:
+            b = 5
         theta_c = self.altitude_to_pitch.update(cmd.altitude_command, state.h)
         delta_e = self.pitch_to_elevator.update(theta_c, state.theta, state.q)
 

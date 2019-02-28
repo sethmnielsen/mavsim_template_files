@@ -211,7 +211,7 @@ class mav_dynamics:
         F_drag = 0.5 * rho * (Va**2) * S * (CD_alpha + MAV.C_D_q * (c / (2 * Va)) * q \
                  + MAV.C_D_delta_e * de)
         m = 0.5 * rho * (Va**2) * S * c * (MAV.C_m_0 + MAV.C_m_alpha * alpha + \
-            MAV.C_m_q * (c / (2 * Va)) * q + MAV.C_m_delta_e * de)
+            MAV.C_m_q * (c / (2. * Va)) * q + MAV.C_m_delta_e * de)
 
         # Lateral
         b = MAV.b
