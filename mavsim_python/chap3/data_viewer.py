@@ -2,10 +2,10 @@ from state_plotter.Plotter import Plotter
 from state_plotter.plotter_args import *
 
 class data_viewer:
-    def __init__(self):
+    def __init__(self, *args):
         time_window_length=100
-        self.plotter = Plotter(plotting_frequency=100, # refresh plot every 100 time steps
-                               time_window=time_window_length)  # plot last time_window seconds of data
+        self.plotter = Plotter(*args, plotting_frequency=100, 
+                                time_window=time_window_length)  # plot last time_window seconds of data
         # set up the plot window
         # define first row
         pn_plots = PlotboxArgs(plots=['pn', 'pn_e'],

@@ -10,8 +10,7 @@ sys.path.append('..')
 import parameters.control_parameters as AP
 from chap6.pid_control import pid_control, pi_control, pd_control_with_rate
 from message_types.msg_state import msg_state
-from control import TransferFunction as TF
-
+from tools.transfer_function import transfer_function
 
 class autopilot:
     def __init__(self, ts_control):
@@ -30,10 +29,10 @@ class autopilot:
                         ki=AP.sideslip_ki,
                         Ts=ts_control,
                         limit=np.radians(45))
-        self.yaw_damper = TF(
-                        np.array([AP.yaw_damper_kp, 0]),
-                        np.array([1, 1/AP.yaw_damper_tau_r]),
-                        ts_control)
+        self.yaw_damper = transfer_function(
+                        num=np.array([AP.yaw_damper_kp, 0]),
+                        den=np.array([1, 1/AP.yaw_damper_tau_r]),
+                        Ts=ts_control)
 
         # instantiate longitudinal controllers
         self.pitch_to_elevator = pd_control_with_rate(
@@ -49,47 +48,27 @@ class autopilot:
                         kp=AP.airspeed_throttle_kp,
                         ki=AP.airspeed_throttle_ki,
                         Ts=ts_control,
-                        limit=1.0)
+                        limit=1.0,
+                        lower_lim=0)
         self.commanded_state = msg_state()
 
     def update(self, cmd, state):
         # lateral autopilot
-        phi_c = self.course_to_roll.update(cmd.course_command, state.chi)
+        phi_c = self.course_to_roll.update(cmd.course_command, state.chi, 
+                                           reset_flag=True)
         delta_a = self.roll_to_aileron.update(phi_c, state.phi, state.p)
-        # delta_r =
+        delta_r = self.yaw_damper.update(state.r)
         
         # longitudinal autopilot
         theta_c = self.altitude_to_pitch.update(cmd.altitude_command, state.h)
         delta_e = self.pitch_to_elevator.update(theta_c, state.theta, state.q)
-
         delta_t = self.airspeed_to_throttle.update(cmd.airspeed_command, state.Va)
-        delta_t = self.saturate(delta_t, 0, 1.0)
-        
-        print('\nVa   :', state.Va)
-        print('cmd alt:', cmd.altitude_command)
-        print('alt    :', state.h)
-        print('theta_c:', theta_c)
-        print('theta  :', state.theta)
-        print('delta_e:', delta_e)
 
         # construct output and commanded states
-        # delta = np.array([delta_e, delta_a, delta_r, delta_t])
-        # print('type:', type(AP.deltas_trim))
-        # print(AP.deltas_trim)
-        # delta = np.array(AP.deltas_trim)
-        delta = np.array([delta_e, delta_a, AP.deltas_trim[2], delta_t])
+        delta = np.array([delta_e, delta_a, delta_r, delta_t])
         self.commanded_state.h = cmd.altitude_command
         self.commanded_state.Va = cmd.airspeed_command
         self.commanded_state.phi = phi_c
         self.commanded_state.theta = theta_c
         self.commanded_state.chi = cmd.course_command
         return delta, self.commanded_state
-
-    def saturate(self, input, low_limit, up_limit):
-        if input <= low_limit:
-            output = low_limit
-        elif input >= up_limit:
-            output = up_limit
-        else:
-            output = input
-        return output

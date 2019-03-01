@@ -160,8 +160,6 @@ class mav_dynamics:
         return x_dot
 
     def _update_velocity_data(self, wind=np.zeros(6)):
-        # self.R_vb = Quaternion2Rotation(self._state[6:10])
-
         # compute airspeed
         V_wb = self.R_vb @ wind[:3] + wind[3:]
         V_ab = self._state[3:6] - V_wb

@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 class transfer_function:
     def __init__(self, num, den, Ts):
         # expects num and den to be numpy arrays of shape (1,m) and (1,n)
+        if len(num.shape) == 1:
+            num = num.reshape(1,num.size)
+            den = den.reshape(1,den.size)
         m = num.shape[1]
         n = den.shape[1]
         # set initial conditions

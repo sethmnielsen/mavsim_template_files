@@ -8,13 +8,40 @@ import sys
 import numpy as np
 sys.path.append('..')
 
-class pid_control:
-    def __init__(self, kp=0.0, ki=0.0, kd=0.0, Ts=0.01, sigma=0.05, limit=1.0):
+class control_base:
+    def __init__(self):
+        pass
+    
+    def _saturate(self, u):
+        if self.lower_lim is not None:
+            lower_lim = self.lower_lim
+        else:
+            lower_lim = -self.limit
+        if u >= self.limit:
+            u_sat = self.limit
+        elif u <= lower_lim:
+            u_sat = lower_lim
+        else:
+            u_sat = u
+        return u_sat
+    
+    def _antiwindup(self, u_unsat, u_sat):
+        if self.ki != 0:
+            self.integrator += self.Ts/self.ki*(u_sat-u_unsat)
+
+    def _integrateError(self, e):
+        self.integrator += self.Ts / 2.0 * (e + self.error_delay_1)
+        self.error_delay_1 = e
+
+
+class pid_control(control_base):
+    def __init__(self, kp=0.0, ki=0.0, kd=0.0, Ts=0.01, sigma=0.05, limit=1.0, lower_lim=None):
         self.kp = kp
         self.ki = ki
         self.kd = kd
         self.Ts = Ts
         self.limit = limit
+        self.lower_lim = lower_lim
         self.integrator = 0.0
         self.error_delay_1 = 0.0
         self.y_d1 = 0.0
@@ -27,7 +54,7 @@ class pid_control:
     def update(self, y_ref, y, reset_flag=False):
         error = y_ref - y
 
-        self.integrator += error*self.Ts
+        self._integrateError(error)
 
         # Compute the dirty derivative
         self.ydot = (2*self.sigma-self.Ts)/(2*self.sigma+self.Ts)*self.ydot +\
@@ -38,95 +65,65 @@ class pid_control:
         u_unsat = self.kp*error + self.ki*self.integrator - self.kd*self.ydot
         u_sat = self._saturate(u_unsat)
 
-        # Anti-windup
-        if self.ki != 0:
-            self.integrator += self.Ts/self.ki*(u_sat-u_unsat)
-        
+        self._antiwindup(u_unsat, u_sat)
+
         return u_sat
 
     def update_with_rate(self, y_ref, y, ydot, reset_flag=False):
         error = y_ref - y
 
-        self.integrator += error*self.Ts
-
-        self.ydot = ydot
+        self._integrateError(error)
 
         # Compute the output
-        u_unsat = self.kp*error + self.ki*self.integrator - self.kd*self.ydot
+        u_unsat = self.kp*error + self.ki*self.integrator - self.ydot
         u_sat = self._saturate(u_unsat)
 
-        # Anti-windup
-        if self.ki != 0:
-            self.integrator += self.Ts/self.ki*(u_sat-u_unsat)        
+        self._antiwindup(u_unsat, u_sat)
+
         return u_sat
 
-    def _saturate(self, u):
-        # saturate u at +- self.limit
-        if u >= self.limit:
-            u_sat = self.limit
-        elif u <= -self.limit:
-            u_sat = -self.limit
-        else:
-            u_sat = u
-        return u_sat
-
-class pi_control:
-    def __init__(self, kp=0.0, ki=0.0, Ts=0.01, limit=1.0):
+class pi_control(control_base):
+    def __init__(self, kp=0.0, ki=0.0, Ts=0.01, limit=1.0, lower_lim=None):
         self.kp = kp
         self.ki = ki
         self.Ts = Ts
         self.limit = limit
+        self.lower_lim = lower_lim
         self.integrator = 0.0
         self.error_delay_1 = 0.0
 
-    def update(self, y_ref, y):
+    def update(self, y_ref, y, reset_flag=False):
         error = y_ref - y
+        if reset_flag:
+            while(error > np.pi):
+                error -= 2 * np.pi
+            while(error <= -np.pi):
+                error += 2 * np.pi
 
-        self.integrator += error*self.Ts
+        self._integrateError(error)
 
         # Compute the output
         u_unsat = self.kp*error + self.ki*self.integrator
         u_sat = self._saturate(u_unsat)
 
-        # Anti-windup
-        # if self.ki != 0:
-            # self.integrator += self.Ts/self.ki*(u_sat-u_unsat)
-            
+        self._antiwindup(u_unsat, u_sat)
+
         return u_sat
 
-    def _saturate(self, u):
-        # saturate u at +- self.limit
-        if u >= self.limit:
-            u_sat = self.limit
-        elif u <= -self.limit:
-            u_sat = -self.limit
-        else:
-            u_sat = u
-        return u_sat
-
-class pd_control_with_rate:
+class pd_control_with_rate(control_base):
     # PD control with rate information
     # u = kp*(yref-y) - kd*ydot
-    def __init__(self, kp=0.0, kd=0.0, limit=1.0):
+    def __init__(self, kp=0.0, kd=0.0, limit=1.0, lower_lim=None):
         self.kp = kp
         self.kd = kd
         self.limit = limit
+        self.lower_lim = lower_lim
 
-    def update(self, y_ref, y, ydot):
+    def update(self, y_ref, y, ydot, reset_flag=False):
         error = y_ref - y
 
         # Compute the output
         u_unsat = self.kp*error - self.kd*ydot
         u_sat = self._saturate(u_unsat)
 
-        return u_sat
-
-    def _saturate(self, u):
-        # saturate u at +- self.limit
-        if u >= self.limit:
-            u_sat = self.limit
-        elif u <= -self.limit:
-            u_sat = -self.limit
-        else:
-            u_sat = u
         return u_sat

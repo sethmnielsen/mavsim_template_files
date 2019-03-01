@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from threading import Lock
 import numpy as np
 from collections import defaultdict
@@ -9,6 +9,7 @@ from state_plotter.plotter_args import PlotArgs, PlotboxArgs
 from state_plotter.state_plotbox import StatePlotbox
 from state_plotter.state_plot import StatePlot
 from state_plotter.state_data import StateData
+from state_plotter.moveable_window import MoveableWindow
 from pdb import set_trace
 
 # Enable antialiasing for prettier plots
@@ -18,7 +19,7 @@ class Plotter:
     """
     Class for plotting methods.
     """
-    def __init__(self, plotting_frequency=1, time_window=15):
+    def __init__(self, *args, plotting_frequency=1, time_window=15):
         ''' Initialize the Plotter
 
             plotting_freq: number of times the update function must be called
@@ -47,9 +48,11 @@ class Plotter:
         # initialize Qt gui application and window
         self.default_window_size = (1000, 800)
         self.app = pg.QtGui.QApplication([])
-        self.window = pg.GraphicsWindow(title="States")
+        # self.window = pg.GraphicsWindow(title="States")
+        self.window = MoveableWindow(title="States")
         self.window.resize(*self.default_window_size)
         self.window.setBackground(self.background_color)
+        self.window.location_on_the_screen(*args)
         self.old_windows = []
         self.row_plot_count = 0
 
