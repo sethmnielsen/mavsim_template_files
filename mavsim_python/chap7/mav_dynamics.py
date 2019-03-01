@@ -102,15 +102,34 @@ class mav_dynamics:
 
 
     def update_sensors(self):
-        "Return value of sensors on MAV: gyros, accels, static_pressure, dynamic_pressure, GPS"
-        self.sensors.gyro_x =
-        self.sensors.gyro_y =
-        self.sensors.gyro_z =
-        self.sensors.accel_x =
-        self.sensors.accel_y =
-        self.sensors.accel_z =
-        self.sensors.static_pressure =
-        self.sensors.diff_pressure =
+        '''
+            Return value of sensors on MAV: gyros, accels, static_pressure, 
+            dynamic_pressure, GPS
+        '''
+        theta = self.true_state.theta
+        phi = self.true_state.phi
+        g = MAV.gravity
+        m = MAV.mass
+        rho = MAV.rho
+        accl_sig = SENSOR.accel_sigma
+        gyro_sig = SENSOR.gyro_sigma
+
+        self.sensors.gyro_x = self.true_state.p + SENSOR.gyro_x_bias + 
+                                                        np.random.randn() * gyro_sig
+        self.sensors.gyro_y = self.true_state.q + SENSOR.gyro_y_bias + 
+                                                        np.random.randn() * gyro_sig
+        self.sensors.gyro_z = self.true_state.r + SENSOR.gyro_z_bias + 
+                                                        np.random.randn() * gyro_sig
+        self.sensors.accel_x = self._forces[0]/m + g*np.sin(theta) +
+                                                        np.random.randn() * accl_sig
+        self.sensors.accel_y = self._forces[1]/m + g*np.sin(theta) +
+                                                        np.random.randn() * accl_sig
+        self.sensors.accel_z = self._forces[2]/m + g*np.sin(theta) +
+                                                        np.random.randn() * accl_sig
+        self.sensors.static_pressure = rho * g * self.true_state.h +  
+                                            np.random.randn() * SENSOR.static_pres_sigma
+        self.sensors.diff_pressure = (rho * self.true_state.Va**2)/g + 
+                                            np.random.randn() * SENSOR.diff_pres_sigma
         if self._t_gps >= SENSOR.ts_gps:
             self._gps_eta_n =
             self._gps_eta_e =
@@ -201,24 +220,91 @@ class mav_dynamics:
         self._beta = asin(V_ab[1]/self._Va)
 
     def _forces_moments(self, delta):
+        """
+        return the forces on the UAV based on the state, wind, and control surfaces
+        :param delta: np.matrix(delta_a, delta_e, delta_r, delta_t)
+        :return: Forces and Moments on the UAV np.matrix(Fx, Fy, Fz, Ml, Mn, Mm)
+        """
+        de = delta[0]
+        da = delta[1]
+        dr = delta[2]
+        dt = delta[3]
 
+        # gravity
+        fg = self.R_bv @ np.array([0,0, MAV.mass * MAV.gravity])
+
+        thrust, torque = self._prop_thrust_torque(dt, self._Va)
+        fp = np.array([thrust, 0, 0])
+        Mp = np.array([torque, 0, 0])
+
+        ## Aerodynamic forces/moments
+        # Longitudinal
+        M = MAV.M
+        alpha = self._alpha
+        alpha0 = MAV.alpha0
+        rho = MAV.rho
+        Va = self._Va
+        S = MAV.S_wing
+        q = self._state[11]
+        c = MAV.c
+
+        sigma_alpha = (1 + exp(-M * (alpha - alpha0)) + exp(M * (alpha + alpha0))) /\
+                      ((1 + exp(-M * (alpha - alpha0)))*(1 + exp(M * (alpha + alpha0))))
+        CL_alpha = (1 - sigma_alpha) * (MAV.C_L_0 + MAV.C_L_alpha * alpha) + \
+                    sigma_alpha * (2 * np.sign(alpha) * (np.sin(alpha)**2) * np.cos(alpha))
+        F_lift = 0.5 * rho * (Va**2) * S * (CL_alpha + MAV.C_L_q * (c / (2 * Va)) * q \
+                 + MAV.C_L_delta_e * de)
+        CD_alpha = MAV.C_D_p + ((MAV.C_L_0 + MAV.C_L_alpha * alpha)**2) / (np.pi * MAV.e * MAV.AR)
+        F_drag = 0.5 * rho * (Va**2) * S * (CD_alpha + MAV.C_D_q * (c / (2 * Va)) * q \
+                 + MAV.C_D_delta_e * de)
+        m = 0.5 * rho * (Va**2) * S * c * (MAV.C_m_0 + MAV.C_m_alpha * alpha + \
+            MAV.C_m_q * (c / (2. * Va)) * q + MAV.C_m_delta_e * de)
+
+        # Lateral
+        b = MAV.b
+        Va = self._Va
+        beta = self.true_state.beta
+        p = self.true_state.p
+        r = self.true_state.r
+        rho = MAV.rho
+        S = MAV.S_wing
+
+        # Calculating fy
+        fa_y = 1/2.0 * rho * (Va**2) * S * (MAV.C_Y_0 + MAV.C_Y_beta * beta + MAV.C_Y_p * (b / (2*Va)) * p +\
+             MAV.C_Y_r * (b / (2 * Va)) * r + MAV.C_Y_delta_a * da + MAV.C_Y_delta_r * dr)
+
+        # Calculating l
+        l = 1/2.0 * rho * (Va**2) * S * b * (MAV.C_ell_0 + MAV.C_ell_beta * beta + MAV.C_ell_p * (b/(2*Va)) * p +\
+            MAV.C_ell_r * (b/(2*Va)) * r + MAV.C_ell_delta_a * da + MAV.C_ell_delta_r * dr)
+
+        # Calculating n
+        n = 1/2.0 * rho * (Va**2) * S * b * (MAV.C_n_0 + MAV.C_n_beta * beta + MAV.C_n_p * (b/(2*Va)) * p +\
+            MAV.C_n_r * (b/(2*Va)) * r + MAV.C_n_delta_a * da + MAV.C_n_delta_r * dr)
+
+        # Combining into force/moment arrays
+        ca = np.cos(alpha)
+        sa = np.sin(alpha)
+        [fa_x, fa_z] = np.array([[ca, -sa], [sa, ca]]) @ np.array([-F_drag, -F_lift])
+        fa = np.array([fa_x, fa_y, fa_z])
+        Ma = np.array([l, m, n])
+
+        # Summing forces and moments
+        [fx, fy, fz] = fg + fa + fp
+        [Mx, My, Mz] = Ma - Mp
         self._forces[0] = fx
         self._forces[1] = fy
         self._forces[2] = fz
-        return np.array([[fx, fy, fz, Mx, My, Mz]]).T
+        return np.array([fx, fy, fz, Mx, My, Mz])
 
-    def _motor_thrust_torque(self, Va, delta_t):
-        return T_p, Q_p
+    # def calc_gamma_chi(self):
+    #     Vg = self.Rv_b @ self._state[3:6]
 
-    def calc_gamma_chi(self):
-        Vg = self.Rv_b @ self._state[3:6]
+    #     gamma = asin(-Vg[2]/np.linalg.norm(Vg)) # h_dot = Vg*sin(gamma)
 
-        gamma = asin(-Vg[2]/np.linalg.norm(Vg)) # h_dot = Vg*sin(gamma)
-
-        Vg_h = Vg * np.cos(gamma)
-        e1 = np.array([1.,0.,0.])
-        chi = acos(np.dot(e1, Vg_h) / np.linalg.norm(Vg_h))
-        if Vg_h[1] < 0:
+    #     Vg_h = Vg * np.cos(gamma)
+    #     e1 = np.array([1.,0.,0.])
+    #     chi = acos(np.dot(e1, Vg_h) / np.linalg.norm(Vg_h))
+    #     if Vg_h[1] < 0:
 
     def _update_true_state(self):
         phi, theta, psi = Quaternion2Euler(self._state[6:10])
@@ -233,11 +319,7 @@ class mav_dynamics:
         self.true_state.psi = psi
         self.true_state.Vg = np.linalg.norm(self._state[3:6])
         self.true_state.gamma = np.arctan2(-self._state[5], self._state[3])
-        self.true_state.gamma = self.calc_gamma()
-        self.true_state.chi = self.calc_chi()
         self.true_state.chi = np.arctan2(self._state[4], self._state[3]) + psi
-
-
         self.true_state.p = self._state[10]
         self.true_state.q = self._state[11]
         self.true_state.r = self._state[12]
