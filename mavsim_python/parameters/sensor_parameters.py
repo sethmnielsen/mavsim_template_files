@@ -27,5 +27,6 @@ gps_beta = 1. / 1100.  # 1 / s
 gps_n_sigma = 0.21
 gps_e_sigma = 0.21
 gps_h_sigma = 0.40
+gps_neh_sigmas = np.array([gps_n_sigma, gps_e_sigma, gps_h_sigma])
 gps_Vg_sigma = 0.05
 gps_course_sigma = gps_Vg_sigma / 10
