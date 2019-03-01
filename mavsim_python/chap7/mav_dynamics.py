@@ -38,8 +38,7 @@ class mav_dynamics:
                                 MAV.q0,    # (11)
                                 MAV.r0])   # (12)
         self._forces = np.zeros(3)
-        self.R_vb = Quaternion2Rotation(self._state[6:10])  # Rotation matrix from vehicle to body
-        self._wind = np.zeros(3)  # wind in NED frame in meters/sec
+        self.R_vb = Quaternion2Rotation(self._state[6:10])  # Rotation vehicle->body
         self._update_velocity_data()
 
         self._Va = MAV.u0
@@ -66,7 +65,6 @@ class mav_dynamics:
             Ts is the time step between function calls.
         '''
 
-        self._wind = wind[:3]
         self.R_vb = Quaternion2Rotation(self._state[6:10])
 
         # get forces and moments acting on rigid bod
@@ -185,7 +183,7 @@ class mav_dynamics:
         return x_dot
 
 
-    def _update_velocity_data(self, wind=np.zeros((6,1))):
+    def _update_velocity_data(self, wind=np.zeros(6)):
         # compute airspeed
         V_wb = self.R_vb @ wind[:3] + wind[3:]
         V_ab = self._state[3:6] - V_wb
