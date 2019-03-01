@@ -40,7 +40,8 @@ class mav_dynamics:
                                 MAV.q0,    # (11)
                                 MAV.r0])   # (12)
 
-        self.R_vb = Quaternion2Rotation(self._state[6:10])  # Rotation matrix from vehicle to body
+        self.R_vb = Quaternion2Rotation(self._state[6:10])  # Rotation body->vehicle
+        self.R_bv = np.copy(self.R_vb).T # vehicle->body
         # store wind data for fast recall since it is used at various points in simulation
         self._wind = np.zeros(3)  # wind in NED frame in meters/sec
         # store forces to avoid recalculation in the sensors function
@@ -65,7 +66,6 @@ class mav_dynamics:
         # Pdb().set_trace()
 
         self._wind = wind[:3]
-        self.R_vb = Quaternion2Rotation(self._state[6:10])
 
         # get forces and moments acting on rigid bod
         forces_moments = self._forces_moments(delta)
@@ -88,6 +88,9 @@ class mav_dynamics:
         self._state[7] = self._state[7]/normE
         self._state[8] = self._state[8]/normE
         self._state[9] = self._state[9]/normE
+
+        self.R_vb = Quaternion2Rotation(self._state[6:10])
+        self.R_bv = np.copy(self.R_vb).T
 
         # update the airspeed, angle of attack, and side slip angles using new state
         self._update_velocity_data(wind)
@@ -183,7 +186,7 @@ class mav_dynamics:
         dt = delta[3]
 
         # gravity
-        fg = self.R_vb.T @ np.array([0,0, MAV.mass * MAV.gravity])
+        fg = self.R_bv @ np.array([0,0, MAV.mass * MAV.gravity])
 
         thrust, torque = self._prop_thrust_torque(dt, self._Va)
         fp = np.array([thrust, 0, 0])

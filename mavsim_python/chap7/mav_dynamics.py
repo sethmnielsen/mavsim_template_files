@@ -19,7 +19,7 @@ from message_types.msg_sensors import msg_sensors
 import parameters.aerosonde_parameters as MAV
 import parameters.sensor_parameters as SENSOR
 from tools.rotations import Quaternion2Rotation, Quaternion2Euler
-from math import asin, exp, acos
+from math import asin, exp, acos, cos
 
 class mav_dynamics:
     def __init__(self, Ts):
@@ -37,8 +37,9 @@ class mav_dynamics:
                                 MAV.p0,    # (10)
                                 MAV.q0,    # (11)
                                 MAV.r0])   # (12)
+        
         self._forces = np.zeros(3)
-        self.R_vb = Quaternion2Rotation(self._state[6:10])  # Rotation vehicle->body
+        self._wind = np.zeros(3)  # wind in NED frame in meters/sec
         self._update_velocity_data()
 
         self._Va = MAV.u0
@@ -54,6 +55,8 @@ class mav_dynamics:
         # timer so that gps only updates every ts_gps seconds
         self._t_gps = 999.  # large value ensures gps updates at initial time.
 
+        self.R_vb = Quaternion2Rotation(self._state[6:10])  # Rotation body->vehicle
+        self.R_bv = np.copy(self.R_vb).T # vehicle->body
 
     ###################################
     # public functions
@@ -65,7 +68,6 @@ class mav_dynamics:
             Ts is the time step between function calls.
         '''
 
-        self.R_vb = Quaternion2Rotation(self._state[6:10])
 
         # get forces and moments acting on rigid bod
         forces_moments = self._forces_moments(delta)
@@ -88,6 +90,9 @@ class mav_dynamics:
         self._state[7] = self._state[7]/normE
         self._state[8] = self._state[8]/normE
         self._state[9] = self._state[9]/normE
+
+        self.R_vb = Quaternion2Rotation(self._state[6:10]) # body->vehicle
+        self.R_bv = np.copy(self.R_vb).T # vehicle->body
 
         # update the airspeed, angle of attack, and side slip angles using new state
         self._update_velocity_data(wind)
@@ -205,5 +210,36 @@ class mav_dynamics:
     def _motor_thrust_torque(self, Va, delta_t):
         return T_p, Q_p
 
+    def calc_gamma_chi(self):
+        Vg = self.Rv_b @ self._state[3:6]
+
+        gamma = asin(-Vg[2]/np.linalg.norm(Vg)) # h_dot = Vg*sin(gamma)
+
+        Vg_h = Vg * np.cos(gamma)
+        e1 = np.array([1.,0.,0.])
+        chi = acos(np.dot(e1, Vg_h) / np.linalg.norm(Vg_h))
+        if Vg_h[1] < 0:
 
     def _update_true_state(self):
+        phi, theta, psi = Quaternion2Euler(self._state[6:10])
+        self.true_state.pn = self._state[0]
+        self.true_state.pe = self._state[1]
+        self.true_state.h = -self._state[2]
+        self.true_state.Va = self._Va
+        self.true_state.alpha = self._alpha
+        self.true_state.beta = self._beta
+        self.true_state.phi = phi
+        self.true_state.theta = theta
+        self.true_state.psi = psi
+        self.true_state.Vg = np.linalg.norm(self._state[3:6])
+        self.true_state.gamma = np.arctan2(-self._state[5], self._state[3])
+        self.true_state.gamma = self.calc_gamma()
+        self.true_state.chi = self.calc_chi()
+        self.true_state.chi = np.arctan2(self._state[4], self._state[3]) + psi
+
+
+        self.true_state.p = self._state[10]
+        self.true_state.q = self._state[11]
+        self.true_state.r = self._state[12]
+        self.true_state.wn = self._wind[0]
+        self.true_state.we = self._wind[1]
