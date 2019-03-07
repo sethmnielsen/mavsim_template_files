@@ -10,7 +10,7 @@ sys.path.append('..')
 import parameters.control_parameters as CTRL
 import parameters.simulation_parameters as SIM
 import parameters.sensor_parameters as SENSOR
-from tools.rotations import Euler2Rotation
+from tools.tools import Euler2Rotation
 
 from message_types.msg_state import msg_state
 
@@ -72,11 +72,11 @@ class alpha_filter:
 class ekf_attitude:
     # implement continous-discrete EKF to estimate roll and pitch angles
     def __init__(self):
-        self.Q =
+        self.Q = np.array()
         self.Q_gyro =
         self.R_accel =
         self.N =   # number of prediction step per sample
-        self.xhat =  # initial state: phi, theta
+        self.xhat = np.zeros(2) # initial state: phi, theta
         self.P =
         self.Ts = SIM.ts_control/self.N
 
@@ -88,7 +88,14 @@ class ekf_attitude:
 
     def f(self, x, state):
         # system dynamics for propagation model: xdot = f(x, u)
-        _f =
+        p = state.p
+        q = state.q
+        r = state.r
+        sphi = np.sin(state.phi)
+        cphi = np.cos(state.phi)
+        ttheta = np.tan(state.theta)
+        _f = np.array([p + q*sphi*ttheta + r*cphi*ttheta,
+                       q*cphi - r*sphi])
         return _f
 
     def h(self, x, state):
@@ -100,11 +107,15 @@ class ekf_attitude:
         # model propagation
         for i in range(0, self.N):
              # propagate model
-            self.xhat =
+            self.xhat += self.Ts * self.f(self.xhat, state)
             # compute Jacobian
             A = jacobian(self.f, self.xhat, state)
             # compute G matrix for gyro noise
-            G =
+            sphi = np.sin(state.phi)
+            cphi = np.cos(state.phi)
+            ttheta = np.tan(state.theta)
+            G = np.array([[1, sphi*ttheta, cphi*ttheta, 0],
+                          [1,        cphi,       -sphi, 0]])
             # update P with continuous time model
             # self.P = self.P + self.Ts * (A @ self.P + self.P @ A.T + self.Q + G @ self.Q_gyro @ G.T)
             # convert to discrete time models
