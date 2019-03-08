@@ -15,11 +15,11 @@ from tools.tools import Euler2Rotation
 from message_types.msg_state import msg_state
 
 class observer:
+        self.lpf_gyro_x = alpha_filter(alpha=0.5)
     def __init__(self, ts_control):
         # initialized estimated state message
         self.estimated_state = msg_state()
         # use alpha filters to low pass filter gyros and accels
-        self.lpf_gyro_x = alpha_filter(alpha=0.5)
         self.lpf_gyro_y = alpha_filter(alpha=0.5)
         self.lpf_gyro_z = alpha_filter(alpha=0.5)
         self.lpf_accel_x = alpha_filter(alpha=0.5)
@@ -36,12 +36,18 @@ class observer:
     def update(self, measurements):
 
         # estimates for p, q, r are low pass filter of gyro minus bias estimate
-        self.estimated_state.p =
-        self.estimated_state.q =
-        self.estimated_state.r =
+        gyro_x = self.lpf_gyro_x.update(measurements.gyro_x)
+        gyro_y = self.lpf_gyro_y.update(measurements.gyro_y)
+        gyro_z = self.lpf_gyro_z.update(measurements.gyro_z)
+
+        self.estimated_state.p = gyro_x - SENSOR.gyro_x_bias
+        self.estimated_state.q = gyro_y - SENSOR.gyro_y_bias
+        self.estimated_state.r = gyro_z - SENSOR.gyro_z_bias
 
         # invert sensor model to get altitude and airspeed
-        self.estimated_state.h =
+        gps_error = np.exp(SENSOR.gps_beta * SENSOR.ts_gps)
+        gps_eta = np.random.randn() * SENSOR.gps_neh_sigmas[2]
+        self.estimated_state.h = measurements.gps_h - (gps_error*)
         self.estimated_state.Va =
 
         # estimate phi and theta with simple ekf
@@ -66,7 +72,7 @@ class alpha_filter:
         self.y = y0  # initial condition
 
     def update(self, u):
-        self.y =
+        self.y = self.y*self.alpha + self.u*(1-self.alpha)
         return self.y
 
 class ekf_attitude:
@@ -117,7 +123,7 @@ class ekf_attitude:
             G = np.array([[1, sphi*ttheta, cphi*ttheta, 0],
                           [1,        cphi,       -sphi, 0]])
             # update P with continuous time model
-            # self.P = self.P + self.Ts * (A @ self.P + self.P @ A.T + self.Q + G @ self.Q_gyro @ G.T)
+            # self.P += self.Ts * (A @ self.P + self.P @ A.T + self.Q + G @ self.Q_gyro @ G.T)
             # convert to discrete time models
             A_d =
             G_d =
