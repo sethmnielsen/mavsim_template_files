@@ -10,16 +10,17 @@ sys.path.append('..')
 import parameters.control_parameters as CTRL
 import parameters.simulation_parameters as SIM
 import parameters.sensor_parameters as SENSOR
+import parameters.aerosonde_parameters as MAV
 from tools.tools import Euler2Rotation
 
 from message_types.msg_state import msg_state
 
 class observer:
-        self.lpf_gyro_x = alpha_filter(alpha=0.5)
     def __init__(self, ts_control):
         # initialized estimated state message
         self.estimated_state = msg_state()
         # use alpha filters to low pass filter gyros and accels
+        self.lpf_gyro_x = alpha_filter(alpha=0.5)
         self.lpf_gyro_y = alpha_filter(alpha=0.5)
         self.lpf_gyro_z = alpha_filter(alpha=0.5)
         self.lpf_accel_x = alpha_filter(alpha=0.5)
@@ -40,15 +41,19 @@ class observer:
         gyro_y = self.lpf_gyro_y.update(measurements.gyro_y)
         gyro_z = self.lpf_gyro_z.update(measurements.gyro_z)
 
-        self.estimated_state.p = gyro_x - SENSOR.gyro_x_bias
-        self.estimated_state.q = gyro_y - SENSOR.gyro_y_bias
-        self.estimated_state.r = gyro_z - SENSOR.gyro_z_bias
+        self.estimated_state.p = gyro_x - self.estimated_state.bx
+        self.estimated_state.q = gyro_y - self.estimated_state.by
+        self.estimated_state.r = gyro_z - self.estimated_state.bz
+
+        measurements.accel_x = self.lpf_accel_x.update(measurements.accel_x)
+        measurements.accel_y = self.lpf_accel_y.update(measurements.accel_y)
+        measurements.accel_z = self.lpf_accel_z.update(measurements.accel_z)
 
         # invert sensor model to get altitude and airspeed
-        gps_error = np.exp(SENSOR.gps_beta * SENSOR.ts_gps)
-        gps_eta = np.random.randn() * SENSOR.gps_neh_sigmas[2]
-        self.estimated_state.h = measurements.gps_h - (gps_error*)
-        self.estimated_state.Va =
+        static_p = self.lpf_static.update(measurements.static_pressure)
+        diff_p = self.lpf_diff.update(measurements.diff_pressure)
+        self.estimated_state.h = static_p / (MAV.rho*MAV.gravity)
+        self.estimated_state.Va = np.sqrt( 2 * diff_p / MAV.rho )
 
         # estimate phi and theta with simple ekf
         self.attitude_ekf.update(self.estimated_state, measurements)
