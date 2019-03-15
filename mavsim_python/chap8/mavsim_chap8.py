@@ -13,7 +13,7 @@ from chap2.mav_viewer import mav_viewer
 from chap3.data_viewer import data_viewer
 from chap4.wind_simulation import wind_simulation
 from chap6.autopilot import autopilot
-from chap7.mav_dynamics import mav_dynamics
+from chap8.mav_dynamics import mav_dynamics
 from chap8.observer import observer
 from tools.signals import signals
 
@@ -59,13 +59,13 @@ while sim_time < SIM.end_time:
     commands.altitude_command = h_command.square(sim_time)
 
     #-------controller-------------
-    measurements = mav.sensors()  # get sensor measurements
+    measurements = mav.update_sensors()  # get sensor measurements
     estimated_state = obsv.update(measurements)  # estimate states from measurements
     delta, commanded_state = ctrl.update(commands, estimated_state)
 
     #-------physical system-------------
     current_wind = wind.update()  # get the new wind vector
-    mav.update(delta, current_wind)  # propagate the MAV dynamics
+    mav.update(delta, current_wind)  # propagate the MAV dynamics, sensor data
 
     #-------update viewer-------------
     mav_view.update(mav.true_state)  # plot body of MAV
