@@ -123,7 +123,7 @@ class mav_dynamics:
         self.sensors.accel_y = self._forces[1]/m + g*np.sin(theta) + accl_eta[1]
         self.sensors.accel_z = self._forces[2]/m + g*np.sin(theta) + accl_eta[2]
         self.sensors.static_pressure = rho * g * self.true_state.h + static_pres_eta  
-        self.sensors.diff_pressure = (rho * self.true_state.Va**2)/g + diff_pres_eta
+        self.sensors.diff_pressure = (rho * self.true_state.Va**2)/2 + diff_pres_eta
 
         if self._t_gps >= SENSOR.ts_gps:
             gps_error = np.exp(SENSOR.gps_beta * SENSOR.ts_gps)

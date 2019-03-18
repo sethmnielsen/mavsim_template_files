@@ -17,6 +17,18 @@
             "debugStdLib": true
         },
         {
+            "name": "mavsim_b",
+            "type": "python",
+            "request": "launch",
+            "program": "home/seth/school/flight_dynamics/bmav/chp8/mavsim_chp8.py",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "PYTHONPATH": "${workspaceRoot}"
+            },
+            "console": "integratedTerminal",
+            "debugStdLib": true
+        },
+        {
             "name": "Python: Current File (Integrated Terminal)",
             "type": "python",
             "request": "launch",

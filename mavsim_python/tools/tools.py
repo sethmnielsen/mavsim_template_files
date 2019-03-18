@@ -62,3 +62,18 @@ def Euler2Rotation(phi, theta, psi):
 
     R = R_roll @ R_pitch @ R_yaw  # inertial to body (Equation 2.4 in book)
     return R.T  # transpose to return body to inertial
+
+def jacobian(fun, x, state):
+    # compute jacobian of fun with respect to x
+    f = fun(x, state)
+    m = f.shape[0]
+    n = x.shape[0]
+    eps = 0.01  # deviation
+    J = np.zeros((m, n))
+    for i in range(0, n):
+        x_eps = np.copy(x)
+        x_eps[i] += eps
+        f_eps = fun(x_eps, state)
+        df = (f_eps - f) / eps
+        J[:, i] = df
+    return J
