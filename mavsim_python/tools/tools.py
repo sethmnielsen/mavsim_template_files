@@ -1,6 +1,8 @@
 import numpy as np
 from math import cos, sin
 
+np.set_printoptions(suppress=True, precision=6)
+
 def Quaternion2Euler(quat):
     e0 = quat[0]
     e1 = quat[1]

@@ -21,6 +21,8 @@ import parameters.sensor_parameters as SENSOR
 from tools.tools import Quaternion2Rotation, Quaternion2Euler
 from math import asin, exp, acos, cos
 
+np.set_printoptions(suppress=True, precision=4)
+
 class mav_dynamics:
     def __init__(self, Ts):
         self._ts_simulation = Ts
@@ -107,6 +109,7 @@ class mav_dynamics:
             dynamic_pressure, GPS
         '''
         theta = self.true_state.theta
+        phi = self.true_state.phi
         g = MAV.gravity
         m = MAV.mass
         rho = MAV.rho
@@ -120,13 +123,13 @@ class mav_dynamics:
         self.sensors.gyro_y = self.true_state.q + SENSOR.gyro_y_bias + gyro_eta[1]
         self.sensors.gyro_z = self.true_state.r + SENSOR.gyro_z_bias + gyro_eta[2]
         self.sensors.accel_x = self._forces[0]/m + g*np.sin(theta) + accl_eta[0]
-        self.sensors.accel_y = self._forces[1]/m + g*np.sin(theta) + accl_eta[1]
-        self.sensors.accel_z = self._forces[2]/m + g*np.sin(theta) + accl_eta[2]
+        self.sensors.accel_y = self._forces[1]/m - g*np.cos(theta) * np.sin(phi) + accl_eta[1]
+        self.sensors.accel_z = self._forces[2]/m - g*np.cos(theta) * np.cos(phi) + accl_eta[2]
         self.sensors.static_pressure = rho * g * self.true_state.h + static_pres_eta  
         self.sensors.diff_pressure = (rho * self.true_state.Va**2)/2 + diff_pres_eta
 
         if self._t_gps >= SENSOR.ts_gps:
-            gps_error = np.exp(SENSOR.gps_beta * SENSOR.ts_gps)
+            gps_error = np.exp(-SENSOR.gps_beta * SENSOR.ts_gps)
             gps_eta = np.random.randn(3) * SENSOR.gps_neh_sigmas  # n, e, h sigmas
             gps_eta_Vg = np.random.randn() * SENSOR.gps_Vg_sigma
             gps_eta_course = np.random.randn() * SENSOR.gps_course_sigma
@@ -152,9 +155,9 @@ class mav_dynamics:
         for the dynamics xdot = f(x, u), returns f(x, u)
         """
         # extract the states
-        # pn = state[0]
-        # pe = state[1]
-        # pd = state[2]
+        pn = state[0]
+        pe = state[1]
+        pd = state[2]
         u  = state[3]
         v  = state[4]
         w  = state[5]
@@ -172,6 +175,8 @@ class mav_dynamics:
         l  = forces_moments[3]
         m  = forces_moments[4]
         n  = forces_moments[5]
+
+        self.R_vb = Quaternion2Rotation(np.array([e0, e1, e2, e3])) # body->vehicle
 
         # position kinematics
         pn_dot, pe_dot, pd_dot = self.R_vb @ np.array([u, v, w])
@@ -210,8 +215,9 @@ class mav_dynamics:
 
 
     def _update_velocity_data(self, wind=np.zeros(6)):
+        R_bv = Quaternion2Rotation(self._state[6:10]).T
         # compute airspeed
-        V_wb = self.R_vb @ wind[:3] + wind[3:]
+        V_wb = R_bv @ wind[:3] + wind[3:]
         V_ab = self._state[3:6] - V_wb
         self._Va = np.linalg.norm(V_ab) 
 

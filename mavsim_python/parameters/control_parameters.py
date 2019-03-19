@@ -17,8 +17,8 @@ Va0 = 25
 # deltas_trim = data[1]
 
 #----------roll loop-------------
-roll_kp = 0.7
-roll_kd = 0.15
+roll_kp = 0.4743
+roll_kd = 0.1584
 
 # ----------course loop-------------
 course_kp = 1.25

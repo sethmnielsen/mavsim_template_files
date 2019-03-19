@@ -61,18 +61,10 @@ while sim_time < SIM.end_time:
 
     #-------controller-------------
     estimated_state = obsv.update(measurements)  # estimate states from measurements
-    estimated_state.pn  = mav.true_state.pn  
-    estimated_state.pe  = mav.true_state.pe  
-    estimated_state.Vg  = mav.true_state.Vg  
-    estimated_state.chi = mav.true_state.chi 
-    estimated_state.wn  = mav.true_state.wn  
-    estimated_state.wn  = mav.true_state.wn  
-    estimated_state.we  = mav.true_state.we  
-    estimated_state.psi = mav.true_state.psi 
     delta, commanded_state = ctrl.update(commands, estimated_state)
 
     #-------physical system-------------
-    current_wind = wind.update()  # get the new wind vector
+    current_wind = wind.update(Va=mav._Va)  # get the new wind vector
     mav.update(delta, current_wind)  # propagate the MAV dynamics, sensor data
     measurements = mav.update_sensors()  # get sensor measurements
 

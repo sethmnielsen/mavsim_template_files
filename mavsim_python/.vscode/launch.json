@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/chap8/mavsim_chap8.py",
-            "cwd": "${workspaceRoot}",
+            "cwd": "${file}",
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },
