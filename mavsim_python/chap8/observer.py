@@ -55,6 +55,8 @@ class observer:
         # invert sensor model to get altitude and airspeed
         static_p = self.lpf_static.update(measurements.static_pressure)
         diff_p = self.lpf_diff.update(measurements.diff_pressure)
+        if diff_p < 0:
+            diff_p = 0
         self.estimated_state.h = static_p / (MAV.rho*MAV.gravity)
         self.estimated_state.Va = np.sqrt( 2 * diff_p / MAV.rho )
 

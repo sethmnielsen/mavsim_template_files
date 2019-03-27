@@ -12,17 +12,16 @@ import parameters.simulation_parameters as SIM
 from chap3.data_viewer import data_viewer
 from chap4.wind_simulation import wind_simulation
 from chap6.autopilot import autopilot
-from chap7.mav_dynamics import mav_dynamics
+from chap8.mav_dynamics import mav_dynamics
 from chap8.observer import observer
 from chap10.path_follower import path_follower
 from chap10.path_viewer import path_viewer
 
 # initialize the visualization
 path_view = path_viewer()  # initialize the viewer
-data_view = data_viewer()  # initialize view of data plots
 DATA = True
 if DATA:
-    pos = [1500, 0]  # x, y position on screen
+    pos = [1100, 0]  # x, y position on screen
     data_view = data_viewer(*pos)  # initialize view of data plots
 
 # initialize elements of the architecture
@@ -31,18 +30,19 @@ mav = mav_dynamics(SIM.ts_simulation)
 ctrl = autopilot(SIM.ts_simulation)
 obsv = observer(SIM.ts_simulation)
 path_follow = path_follower()
+measurements = mav.sensors
 
 # path definition
 from message_types.msg_path import msg_path
 path = msg_path()
-path.flag = 'line'
-#path.flag = 'orbit'
+# path.flag = 'line'
+path.flag = 'orbit'
 if path.flag == 'line':
-    path.line_origin = np.array([[0.0, 0.0, -100.0]]).T
-    path.line_direction = np.array([[0.5, 1.0, 0.0]]).T
+    path.line_origin = np.array([0.0, 0.0, -100.0])
+    path.line_direction = np.array([0.5, 1.0, 0.0])
     path.line_direction = path.line_direction / np.linalg.norm(path.line_direction)
 else:  # path.flag == 'orbit'
-    path.orbit_center = np.array([[0.0, 0.0, -100.0]]).T  # center of the orbit
+    path.orbit_center = np.array([0.0, 0.0, -100.0])  # center of the orbit
     path.orbit_radius = 300.0  # radius of the orbit
     path.orbit_direction = 'CW'  # orbit direction: 'CW'==clockwise, 'CCW'==counter clockwise
 
@@ -53,7 +53,7 @@ sim_time = SIM.start_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
     #-------observer-------------
-    measurements = mav.sensors()  # get sensor measurements
+    measurements = mav.update_sensors()  # get sensor measurements
     estimated_state = obsv.update(measurements)  # estimate states from measurements
 
     #-------path follower-------------

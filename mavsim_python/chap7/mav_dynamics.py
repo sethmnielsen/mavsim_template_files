@@ -289,13 +289,13 @@ class mav_dynamics:
         # Combining into force/moment arrays
         ca = np.cos(alpha)
         sa = np.sin(alpha)
-        [fa_x, fa_z] = np.array([[ca, -sa], [sa, ca]]) @ np.array([-F_drag, -F_lift])
+        fa_x, fa_z = np.array([[ca, -sa], [sa, ca]]) @ np.array([-F_drag, -F_lift])
         fa = np.array([fa_x, fa_y, fa_z])
         Ma = np.array([l, m, n])
 
         # Summing forces and moments
-        [fx, fy, fz] = fg + fa + fp
-        [Mx, My, Mz] = Ma - Mp
+        fx, fy, fz = fg + fa + fp
+        Mx, My, Mz = Ma - Mp
         self._forces[0] = fx
         self._forces[1] = fy
         self._forces[2] = fz

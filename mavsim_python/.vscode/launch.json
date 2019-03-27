@@ -8,7 +8,7 @@
             "name": "mavsim",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceRoot}/chap8/mavsim_chap8.py",
+            "program": "${workspaceRoot}/chap10/mavsim_chap10.py",
             "cwd": "${file}",
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
