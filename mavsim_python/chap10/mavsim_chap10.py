@@ -18,14 +18,12 @@ from chap10.path_follower import path_follower
 from chap10.path_viewer import path_viewer
 
 # initialize the visualization
-VIDEO = False  # True==write video, False==don't write video
 path_view = path_viewer()  # initialize the viewer
 data_view = data_viewer()  # initialize view of data plots
-if VIDEO == True:
-    from chap2.video_writer import video_writer
-    video = video_writer(video_name="chap10_video.avi",
-                         bounding_box=(0, 0, 1000, 1000),
-                         output_rate=SIM.ts_video)
+DATA = True
+if DATA:
+    pos = [1500, 0]  # x, y position on screen
+    data_view = data_viewer(*pos)  # initialize view of data plots
 
 # initialize elements of the architecture
 wind = wind_simulation(SIM.ts_simulation)
@@ -71,17 +69,12 @@ while sim_time < SIM.end_time:
 
     #-------update viewer-------------
     path_view.update(path, mav.true_state)  # plot path and MAV
-    data_view.update(mav.true_state, # true states
-                     estimated_state, # estimated states
-                     commanded_state, # commanded states
-                     SIM.ts_simulation)
-    if VIDEO == True: video.update(sim_time)
-
+    if DATA:
+        data_view.update(mav.true_state, # true states
+                        estimated_state, # estimated states
+                        commanded_state, # commanded states
+                        SIM.ts_simulation)
+    
+    
     #-------increment time-------------
     sim_time += SIM.ts_simulation
-
-if VIDEO == True: video.close()
-
-
-
-

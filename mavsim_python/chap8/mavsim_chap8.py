@@ -84,7 +84,3 @@ while sim_time < SIM.end_time:
     sim_time += SIM.ts_simulation
 
 print("Finished")
-
-
-
-
