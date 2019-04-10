@@ -20,14 +20,12 @@ from chap11.path_manager import path_manager
 from chap11.waypoint_viewer import waypoint_viewer
 
 # initialize the visualization
-VIDEO = False  # True==write video, False==don't write video
 waypoint_view = waypoint_viewer()  # initialize the viewer
-data_view = data_viewer()  # initialize view of data plots
-if VIDEO == True:
-    from chap2.video_writer import video_writer
-    video = video_writer(video_name="chap11_video.avi",
-                         bounding_box=(0, 0, 1000, 1000),
-                         output_rate=SIM.ts_video)
+DATA = True
+if DATA:
+    pos = [1100, 0]  # x, y position on screen
+    data_view = data_viewer(*pos)  # initialize view of data plots
+
 
 # initialize elements of the architecture
 wind = wind_simulation(SIM.ts_simulation)
@@ -40,9 +38,9 @@ path_manage = path_manager()
 # waypoint definition
 from message_types.msg_waypoints import msg_waypoints
 waypoints = msg_waypoints()
-#waypoints.type = 'straight_line'
-#waypoints.type = 'fillet'
-waypoints.type = 'dubins'
+waypoints.type = 'straight_line'
+# waypoints.type = 'fillet'
+# waypoints.type = 'dubins'
 waypoints.num_waypoints = 4
 Va = PLAN.Va0
 waypoints.ned[:, 0:waypoints.num_waypoints] \
@@ -83,17 +81,11 @@ while sim_time < SIM.end_time:
 
     #-------update viewer-------------
     waypoint_view.update(waypoints, path, mav.true_state)  # plot path and MAV
-    data_view.update(mav.true_state, # true states
-                     estimated_state, # estimated states
-                     commanded_state, # commanded states
-                     SIM.ts_simulation)
-    if VIDEO == True: video.update(sim_time)
+    if DATA:
+        data_view.update(mav.true_state, # true states
+                        estimated_state, # estimated states
+                        commanded_state, # commanded states
+                        SIM.ts_simulation)
 
     #-------increment time-------------
     sim_time += SIM.ts_simulation
-
-if VIDEO == True: video.close()
-
-
-
-

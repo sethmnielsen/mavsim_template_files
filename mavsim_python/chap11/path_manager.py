@@ -23,33 +23,41 @@ class path_manager:
         self.dubins_path = dubins_parameters()
 
     def update(self, waypoints, radius, state):
-        def update(self, waypoints, radius, state):
-            # this flag is set for one time step to signal a redraw in the viewer
-            if self.path.flag_path_changed == True:
-                self.path.flag_path_changed = False
-            if waypoints.num_waypoints == 0:
-                waypoints.flag_manager_requests_waypoints = True
+        # this flag is set for one time step to signal a redraw in the viewer
+        if self.path.flag_path_changed == True:
+            self.path.flag_path_changed = False
+        if waypoints.num_waypoints == 0:
+            waypoints.flag_manager_requests_waypoints = True
+        else:
+            if waypoints.type == 'straight_line':
+                self.line_manager(waypoints, state)
+            elif waypoints.type == 'fillet':
+                self.fillet_manager(waypoints, radius, state)
+            elif waypoints.type == 'dubins':
+                self.dubins_manager(waypoints, radius, state)
             else:
-                if waypoints.type == 'straight_line':
-                    self.line_manager(waypoints, state)
-                elif waypoints.type == 'fillet':
-                    self.fillet_manager(waypoints, radius, state)
-                elif waypoints.type == 'dubins':
-                    self.dubins_manager(waypoints, radius, state)
-                else:
-                    print('Error in Path Manager: Undefined waypoint type.')
-            return self.path
+                print('Error in Path Manager: Undefined waypoint type.')
+        return self.path
 
     def line_manager(self, waypoints, state):
-
+        pass
+        
     def fillet_manager(self, waypoints, radius, state):
-
+        pass
+        
     def dubins_manager(self, waypoints, radius, state):
+        pass
 
     def initialize_pointers(self):
+        self.ptr_previous = 0
+        self.ptr_current = 1
+        self.ptr_next = 2
 
     def increment_pointers(self):
-
+        self.ptr_previous += 1
+        self.ptr_current += 1
+        self.ptr_next += 1
+        
     def inHalfSpace(self, pos):
         if (pos-self.halfspace_r).T @ self.halfspace_n >= 0:
             return True
