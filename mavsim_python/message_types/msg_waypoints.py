@@ -25,20 +25,20 @@ class msg_waypoints:
         self.type = 'straight_line'
         # self.type = 'fillet'
         # self.type = 'dubins'
-        # maximum number of waypoints.  This is used to pre-allocate memory to improve efficiency
+        # maximum number of waypoints. Used to pre-allocate memory/improve efficiency
         self.max_waypoints = 100
         # current number of valid waypoints in memory
         self.num_waypoints = 0
         # [n, e, d] - coordinates of waypoints
-        self.ned = np.inf * np.ones((3, self.max_waypoints))
+        self.ned = np.inf * np.ones((self.max_waypoints, 3))
         # the airspeed that is commanded along the waypoints
-        self.airspeed = np.inf * np.ones((1, self.max_waypoints))
+        self.airspeed = np.inf * np.ones(self.max_waypoints)
         # the desired course at each waypoint (used only for Dubins paths)
-        self.course = np.inf * np.ones((1, self.max_waypoints))
+        self.course = np.inf * np.ones(self.max_waypoints)
 
-        # these last three variables are used by the path planner running cost at each node
-        self.cost = np.inf * np.ones((1, self.max_waypoints))
+        # these variables are used by the path planner running cost at each node
+        self.cost = np.inf * np.ones(self.max_waypoints)
         # index of the parent to the node
-        self.parent_idx = np.inf * np.ones((1, self.max_waypoints))
+        self.parent_idx = np.inf * np.ones(self.max_waypoints)
         # can this node connect to the goal?
-        self.flag_connect_to_goal = 0 * np.ones((1, self.max_waypoints))
+        self.flag_connect_to_goal = 0 * np.ones(self.max_waypoints)

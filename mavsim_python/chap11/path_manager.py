@@ -15,8 +15,8 @@ class path_manager:
         # flag that request new waypoints from path planner
         self.flag_need_new_waypoints = True
         self.num_waypoints = 0
-        self.halfspace_n = np.inf * np.ones((3,1))
-        self.halfspace_r = np.inf * np.ones((3,1))
+        self.halfspace_n = np.inf * np.ones(3)
+        self.halfspace_r = np.inf * np.ones(3)
         # state of the manager state machine
         self.manager_state = 1
         # dubins path parameters
@@ -40,7 +40,31 @@ class path_manager:
         return self.path
 
     def line_manager(self, waypoints, state):
-        pass
+        if np.all(np.isinf(self.halfspace_n)):
+            w_prev = waypoints.ned[self.ptr_previous]
+            wi     = waypoints.ned[self.ptr_current]
+            w_next = waypoints.ned[self.ptr_next]
+
+            q_prev = wi - w_prev
+            q_prev /= np.linalg.norm(w_next - wi)
+            qi = w_next - wi
+            qi /= np.linalg.norm(qi)
+
+            n = q_prev + qi
+            n /= np.linalg.norm(n)
+            
+            self.halfspace_r = wi
+            self.halfspace_n = n
+
+        p = np.array([state.pn, state.pe, -state.h])
+
+        if self.inHalfSpace(p):
+            self.increment_pointers()
+            self.path.flag_path_changed = True
+            self.path.line_origin = wi
+            self.path.line_direction = qi
+
+            self.halfspace_n = np.inf * np.ones(3)
         
     def fillet_manager(self, waypoints, radius, state):
         pass
@@ -57,9 +81,16 @@ class path_manager:
         self.ptr_previous += 1
         self.ptr_current += 1
         self.ptr_next += 1
+
+        if self.ptr_previous >= self.num_waypoints:
+            self.ptr_previous = 0
+        elif self.ptr_current >= self.num_waypoints:
+            self.ptr_current = 0
+        elif self.ptr_next >= self.num_waypoints:
+            self.ptr_next = 0
         
     def inHalfSpace(self, pos):
-        if (pos-self.halfspace_r).T @ self.halfspace_n >= 0:
+        if (pos-self.halfspace_r) @ self.halfspace_n >= 0:
             return True
         else:
             return False
