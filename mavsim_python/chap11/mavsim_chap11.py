@@ -57,7 +57,7 @@ waypoints.course[:waypoints.num_waypoints] = np.array([np.radians(0),
 sim_time = SIM.start_time
 
 # main simulation loop
-print("Press Command-Q to exit...")
+print("Press Q to exit...")
 while sim_time < SIM.end_time:
     #-------observer-------------
     measurements = mav.update_sensors()  # get sensor measurements

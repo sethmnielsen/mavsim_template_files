@@ -1,9 +1,11 @@
 """
 mavsim_python: waypoitn viewer (for chapter 11)
     - Beard & McLain, PUP, 2012
-    - Update history:  
+    - Update history:
         3/26/2019 - RWB
 """
+
+#Currently this is just the waypoint viewer
 import sys
 sys.path.append("..")
 import numpy as np
@@ -12,8 +14,8 @@ import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import pyqtgraph.Vector as Vector
 
-from tools.rotations import Euler2Rotation
-from chap11.dubins_parameters import dubins_parameters
+from tools.tools import Euler2Rotation
+from dubins_parameters import dubins_parameters
 
 class waypoint_viewer():
     def __init__(self):
@@ -197,9 +199,9 @@ class waypoint_viewer():
 
     def drawPath(self, path):
         red = np.array([[1., 0., 0., 1]])
-        if path.type == 'line':
+        if path.flag == 'line':
             points = self.straight_line_points(path)
-        elif path.type == 'orbit':
+        elif path.flag == 'orbit':
             points = self.orbit_points(path)
         if not self.plot_initialized:
             path_color = np.tile(red, (points.shape[0], 1))
@@ -265,18 +267,16 @@ class waypoint_viewer():
 
     def straight_waypoint_points(self, waypoints):
         R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
-        wps = np.copy(waypoints.ned)
-        wps = wps[~np.all(np.isinf(wps), 1)]
-        points = R @ wps.T
+        points = R @ waypoints.ned
         return points.T
 
     def dubins_points(self, waypoints, radius, Del):
         initialize_points = True
         for j in range(0, waypoints.num_waypoints-1):
             self.dubins_path.update(
-                waypoints.ned[j:j+1],
+                waypoints.ned[:, j:j+1],
                 waypoints.course.item(j),
-                waypoints.ned[j+1:j+2],
+                waypoints.ned[:, j+1:j+2],
                 waypoints.course.item(j+1),
                 radius)
 
@@ -372,5 +372,3 @@ def mod(x):
     while x > 2*np.pi:
         x -= 2*np.pi
     return x
-
-

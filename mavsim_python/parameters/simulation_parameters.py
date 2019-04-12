@@ -7,10 +7,8 @@ import numpy as np
 ######################################################################################
 ts_simulation = 0.02  # smallest time step for simulation
 start_time = 0.  # start time for simulation
-end_time = 50.  # end time for simulation
+end_time = 50000.  # end time for simulation
 
-ts_plotting = 0.2  # refresh rate for plots
-
-ts_video = 0.1  # write rate for video
+ts_plotting = 0.1  # refresh rate for plots
 
 ts_control = ts_simulation  # sample rate for the controller

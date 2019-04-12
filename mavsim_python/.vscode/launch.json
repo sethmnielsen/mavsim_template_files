@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/chap11/mavsim_chap11.py",
-            "cwd": "${file}",
+            "cwd": "${workspaceRoot}",
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },
@@ -20,7 +20,7 @@
             "name": "mavsim_b",
             "type": "python",
             "request": "launch",
-            "program": "home/seth/school/flight_dynamics/bmav/chp8/mavsim_chp8.py",
+            "program": "home/seth/school/flight_dynamics/bmav/chp11/mavsim_chp11.py",
             "cwd": "${workspaceRoot}",
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"

@@ -9,7 +9,7 @@ class path_manager:
         # message sent to path follower
         self.path = msg_path()
         # pointers to previous, current, and next waypoints
-        self.ptr_previous = 0
+        self.ptr_prev = 0
         self.ptr_current = 1
         self.ptr_next = 2
         # flag that request new waypoints from path planner
@@ -25,7 +25,12 @@ class path_manager:
     def update(self, waypoints, radius, state):
         # this flag is set for one time step to signal a redraw in the viewer
         if self.path.flag_path_changed == True:
-            self.path.flag_path_changed = False
+            self.num_waypoints = waypoints.num_waypoints
+            self.flag_need_new_waypoints = False
+            self.initialize_pointers()
+            waypoints.flag_waypoints_changed = False
+            self.manager_state = 1
+            
         if waypoints.num_waypoints == 0:
             waypoints.flag_manager_requests_waypoints = True
         else:
@@ -40,10 +45,10 @@ class path_manager:
         return self.path
 
     def line_manager(self, waypoints, state):
+        w_prev = waypoints.ned[self.ptr_prev]
+        wi     = waypoints.ned[self.ptr_current]
+        w_next = waypoints.ned[self.ptr_next]
         if np.all(np.isinf(self.halfspace_n)):
-            w_prev = waypoints.ned[self.ptr_previous]
-            wi     = waypoints.ned[self.ptr_current]
-            w_next = waypoints.ned[self.ptr_next]
 
             q_prev = wi - w_prev
             q_prev /= np.linalg.norm(w_next - wi)
@@ -61,9 +66,8 @@ class path_manager:
         if self.inHalfSpace(p):
             self.increment_pointers()
             self.path.flag_path_changed = True
-            self.path.line_origin = wi
-            self.path.line_direction = qi
-
+            self.path.line_origin = waypoints.ned[self.ptr_prev]
+            self.path.line_direction = w_next - wi
             self.halfspace_n = np.inf * np.ones(3)
         
     def fillet_manager(self, waypoints, radius, state):
@@ -73,20 +77,21 @@ class path_manager:
         pass
 
     def initialize_pointers(self):
-        self.ptr_previous = 0
+        self.ptr_prev = 0
         self.ptr_current = 1
         self.ptr_next = 2
+        self.manager_state = 1
 
     def increment_pointers(self):
-        self.ptr_previous += 1
+        self.ptr_prev += 1
         self.ptr_current += 1
         self.ptr_next += 1
 
-        if self.ptr_previous >= self.num_waypoints:
-            self.ptr_previous = 0
-        elif self.ptr_current >= self.num_waypoints:
+        if self.ptr_prev >= self.num_waypoints:
+            self.ptr_prev = 0
+        if self.ptr_current >= self.num_waypoints:
             self.ptr_current = 0
-        elif self.ptr_next >= self.num_waypoints:
+        if self.ptr_next >= self.num_waypoints:
             self.ptr_next = 0
         
     def inHalfSpace(self, pos):
