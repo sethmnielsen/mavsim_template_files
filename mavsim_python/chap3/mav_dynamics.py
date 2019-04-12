@@ -17,7 +17,7 @@ import numpy as np
 from message_types.msg_state import msg_state
 
 import parameters.aerosonde_parameters as MAV
-from tools.tools import Quaternion2Euler
+from tools.rotations import Quaternion2Euler
 
 from IPython.core.debugger import Pdb
 

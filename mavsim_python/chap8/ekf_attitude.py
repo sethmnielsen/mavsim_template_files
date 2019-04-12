@@ -4,7 +4,7 @@ sys.path.append('..')
 import parameters.simulation_parameters as SIM
 import parameters.sensor_parameters as SENSOR
 import parameters.aerosonde_parameters as MAV
-from tools.tools import jacobian
+from tools.rotations import jacobian
 
 class ekf_attitude:
     # implement continous-discrete EKF to estimate roll and pitch angles

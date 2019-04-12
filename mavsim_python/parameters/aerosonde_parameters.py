@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 import numpy as np
-from tools.tools import Euler2Quaternion
+from tools.rotations import Euler2Quaternion
 
 ######################################################################################
                 #   Initial Conditions

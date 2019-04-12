@@ -3,7 +3,7 @@ import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import pyqtgraph.Vector as Vector
-from tools.tools import Euler2Rotation
+from tools.rotations import Euler2Rotation
 
 from IPython.core.debugger import Pdb
 

@@ -11,7 +11,7 @@ import parameters.control_parameters as CTRL
 import parameters.simulation_parameters as SIM
 import parameters.sensor_parameters as SENSOR
 import parameters.aerosonde_parameters as MAV
-from tools.tools import Euler2Rotation
+from tools.rotations import Euler2Rotation
 
 from message_types.msg_state import msg_state
 from chap8.ekf_attitude import ekf_attitude

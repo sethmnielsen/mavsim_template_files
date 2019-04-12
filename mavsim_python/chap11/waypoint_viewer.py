@@ -265,7 +265,7 @@ class waypoint_viewer():
 
     def straight_waypoint_points(self, waypoints):
         R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
-        points = R @ waypoints.ned
+        points = R @ waypoints.ned.T
         return points.T
 
     def dubins_points(self, waypoints, radius, Del):

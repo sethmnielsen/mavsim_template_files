@@ -18,7 +18,7 @@ from message_types.msg_sensors import msg_sensors
 
 import parameters.aerosonde_parameters as MAV
 import parameters.sensor_parameters as SENSOR
-from tools.tools import Quaternion2Rotation, Quaternion2Euler
+from tools.rotations import Quaternion2Rotation, Quaternion2Euler
 from math import asin, exp, acos, cos
 
 class mav_dynamics:

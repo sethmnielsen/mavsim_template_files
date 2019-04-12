@@ -13,7 +13,7 @@ import parameters.planner_parameters as PLAN
 from chap3.data_viewer import data_viewer
 from chap4.wind_simulation import wind_simulation
 from chap6.autopilot import autopilot
-from chap7.mav_dynamics import mav_dynamics
+from chap8.mav_dynamics import mav_dynamics
 from chap8.observer import observer
 from chap10.path_follower import path_follower
 from chap11.path_manager import path_manager
@@ -60,7 +60,7 @@ sim_time = SIM.start_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
     #-------observer-------------
-    measurements = mav.sensors()  # get sensor measurements
+    measurements = mav.update_sensors()  # get sensor measurements
     estimated_state = obsv.update(measurements)  # estimate states from measurements
 
     #-------path manager-------------

@@ -8,7 +8,7 @@ import sys
 sys.path.append('..')
 import numpy as np
 from scipy.optimize import minimize
-from tools.tools import Euler2Quaternion
+from tools.rotations import Euler2Quaternion
 from chap4.mav_dynamics import mav_dynamics
 import pickle as pkl
 

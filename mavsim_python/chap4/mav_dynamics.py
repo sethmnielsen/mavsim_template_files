@@ -13,7 +13,7 @@ from math import asin, exp
 from message_types.msg_state import msg_state
 
 import parameters.aerosonde_parameters as MAV
-from tools.tools import Quaternion2Rotation, Quaternion2Euler
+from tools.rotations import Quaternion2Rotation, Quaternion2Euler
 
 np.set_printoptions(linewidth=100)
 
