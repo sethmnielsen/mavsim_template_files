@@ -23,7 +23,7 @@ from chap11.waypoint_viewer import waypoint_viewer
 waypoint_view = waypoint_viewer()  # initialize the viewer
 DATA = True
 if DATA:
-    pos = [1100, 0]  # x, y position on screen
+    pos = [2000, 0]  # x, y position on screen
     data_view = data_viewer(*pos)  # initialize view of data plots
 
 
@@ -48,10 +48,10 @@ waypoints.ned[:waypoints.num_waypoints] = np.array([[   0,    0, -100],
                                                     [   0, 1000, -100],
                                                     [1000, 1000, -100]])
 waypoints.airspeed[:waypoints.num_waypoints] = np.array([Va, Va, Va, Va])
-waypoints.course[:waypoints.num_waypoints] = np.array([[np.radians(0),
-                                                        np.radians(45),
-                                                        np.radians(45),
-                                                        np.radians(-135)]])
+waypoints.course[:waypoints.num_waypoints] = np.array([np.radians(0),
+                                                       np.radians(45),
+                                                       np.radians(45),
+                                                       np.radians(-135)])
 
 # initialize the simulation time
 sim_time = SIM.start_time
