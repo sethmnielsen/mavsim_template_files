@@ -48,18 +48,23 @@ class path_manager:
         w_prev = waypoints.ned[self.ptr_prev]
         wi     = waypoints.ned[self.ptr_current]
         w_next = waypoints.ned[self.ptr_next]
+        
         if np.all(np.isinf(self.halfspace_n)):
-
             q_prev = wi - w_prev
-            q_prev /= np.linalg.norm(w_next - wi)
+            q_prev /= np.linalg.norm(wi - w_prev)
             qi = w_next - wi
             qi /= np.linalg.norm(qi)
 
             n = q_prev + qi
             n /= np.linalg.norm(n)
             
-            self.halfspace_r = wi
-            self.halfspace_n = n
+            self.halfspace_r = np.copy(wi)
+            self.halfspace_n = np.copy(n)
+
+            self.path.flag = 'line'
+            self.path.airspeed = waypoints.airspeed[self.ptr_current]
+            self.path.line_origin = np.copy(w_prev)
+            self.path.line_direction = np.copy(q_prev)
 
         p = np.array([state.pn, state.pe, -state.h])
 
@@ -95,6 +100,10 @@ class path_manager:
             self.ptr_next = 0
         
     def inHalfSpace(self, pos):
+        # print('\npos: ', pos)
+        # print('self.halfspace_r: ', self.halfspace_r)
+        # print('self.halfspace_n: ', self.halfspace_n)
+        
         if (pos-self.halfspace_r) @ self.halfspace_n >= 0:
             return True
         else:
