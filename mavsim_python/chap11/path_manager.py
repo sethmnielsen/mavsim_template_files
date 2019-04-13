@@ -24,7 +24,7 @@ class path_manager:
 
     def update(self, waypoints, radius, state):
         # this flag is set for one time step to signal a redraw in the viewer
-        if self.path.flag_path_changed == True:
+        if waypoints.flag_waypoints_changed == True:
             self.num_waypoints = waypoints.num_waypoints
             self.flag_need_new_waypoints = False
             self.initialize_pointers()
@@ -72,11 +72,47 @@ class path_manager:
             self.increment_pointers()
             self.path.flag_path_changed = True
             self.path.line_origin = waypoints.ned[self.ptr_prev]
-            self.path.line_direction = w_next - wi
+            qi = w_next - wi
+            qi /= np.linalg.norm(qi)
+            self.path.line_direction = qi
             self.halfspace_n = np.inf * np.ones(3)
+        else:
+            self.path.flag_path_changed = False
         
     def fillet_manager(self, waypoints, radius, state):
-        pass
+        w_prev = waypoints.ned[self.ptr_prev]
+        wi     = waypoints.ned[self.ptr_current]
+        w_next = waypoints.ned[self.ptr_next]
+        
+        if np.all(np.isinf(self.halfspace_n)):
+            q_prev = wi - w_prev
+            q_prev /= np.linalg.norm(wi - w_prev)
+            qi = w_next - wi
+            qi /= np.linalg.norm(qi)
+
+            n = q_prev + qi
+            n /= np.linalg.norm(n)
+            
+            self.halfspace_r = np.copy(wi)
+            self.halfspace_n = np.copy(n)
+
+            self.path.flag = 'line'
+            self.path.airspeed = waypoints.airspeed[self.ptr_current]
+            self.path.line_origin = np.copy(w_prev)
+            self.path.line_direction = np.copy(q_prev)
+
+        p = np.array([state.pn, state.pe, -state.h])
+
+        if self.inHalfSpace(p):
+            self.increment_pointers()
+            self.path.flag_path_changed = True
+            self.path.line_origin = waypoints.ned[self.ptr_prev]
+            qi = w_next - wi
+            qi /= np.linalg.norm(qi)
+            self.path.line_direction = qi
+            self.halfspace_n = np.inf * np.ones(3)
+        else:
+            self.path.flag_path_changed = False
         
     def dubins_manager(self, waypoints, radius, state):
         pass

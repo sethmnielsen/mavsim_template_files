@@ -23,8 +23,8 @@ from chap11.waypoint_viewer import waypoint_viewer
 waypoint_view = waypoint_viewer()  # initialize the viewer
 DATA = True
 if DATA:
-    pos = [2000, 0]  # x, y position on screen
-    data_view = data_viewer(*pos)  # initialize view of data plots
+    screen_pos = [2000, 0]  # x, y position on screen
+    data_view = data_viewer(*screen_pos)  # initialize view of data plots
 
 
 # initialize elements of the architecture
