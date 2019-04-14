@@ -59,7 +59,6 @@ sim_time = SIM.start_time
 delta = np.zeros(4)
 mav.update(delta)  # propagate the MAV dynamics
 mav.update_sensors()
-
 # main simulation loop
 print("Press Q to exit...")
 while sim_time < SIM.end_time:
@@ -82,7 +81,13 @@ while sim_time < SIM.end_time:
     mav.update(delta, current_wind)  # propagate the MAV dynamics
 
     #-------update viewer-------------
-    waypoint_view.update(waypoints, path, mav.true_state)  # plot path and MAV
+    if not waypoint_view.plot_initialized:
+        waypoint_view.update(waypoints, path, mav.true_state)  # plot path and MAV
+        path.flag_path_changed = True
+        waypoint_view.update(waypoints, path, mav.true_state)  # plot path and MAV
+    else:
+        waypoint_view.update(waypoints, path, mav.true_state)  # plot path and MAV
+        
     if DATA:
         data_view.update(mav.true_state, # true states
                         estimated_state, # estimated states

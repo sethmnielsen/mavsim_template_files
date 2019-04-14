@@ -167,6 +167,8 @@ class path_manager:
                 self.manager_state = 2
                 self.state_changed = True
         elif self.manager_state == 2:
+            self.path.flag_path_changed = self.state_changed
+            self.state_changed = False
             self.halfspace_n = self.dubins_path.n1
             self.halfspace_r = self.dubins_path.r1
             if self.inHalfSpace(p):
@@ -198,7 +200,7 @@ class path_manager:
             self.halfspace_r = self.dubins_path.r3
             if self.inHalfSpace(p):
                 self.manager_state = 5
-                self.path.dubins_state_changed = True
+                self.state_changed = True
         else:
             self.path.flag_path_changed = self.state_changed
             self.state_changed = False
@@ -206,7 +208,7 @@ class path_manager:
             self.halfspace_r = self.dubins_path.r3
             if self.inHalfSpace(p):
                 self.manager_state = 1
-                self.path.dubins_state_changed = True
+                self.state_changed = True
                 self.increment_pointers()
 
     def initialize_pointers(self):

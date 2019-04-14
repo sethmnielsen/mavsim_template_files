@@ -36,7 +36,7 @@ from message_types.msg_waypoints import msg_waypoints
 waypoints = msg_waypoints()
 waypoints.type = 'straight_line'
 waypoints.type = 'fillet'
-# waypoints.type = 'dubins'
+waypoints.type = 'dubins'
 waypoints.flag_wrap_waypoints = True
 waypoints.num_waypoints = 4
 Va = PLAN.Va0
