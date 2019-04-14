@@ -38,7 +38,7 @@ path_manage = path_manager()
 # waypoint definition
 from message_types.msg_waypoints import msg_waypoints
 waypoints = msg_waypoints()
-# waypoints.type = 'straight_line'
+waypoints.type = 'straight_line'
 waypoints.type = 'fillet'
 waypoints.type = 'dubins'
 waypoints.num_waypoints = 4
@@ -70,8 +70,8 @@ while sim_time < SIM.end_time:
     path = path_manage.update(waypoints, PLAN.R_min, estimated_state)
 
     #-------path follower-------------
-    autopilot_commands = path_follow.update(path, estimated_state)
-    # autopilot_commands = path_follow.update(path, mav.true_state)
+    # autopilot_commands = path_follow.update(path, estimated_state)
+    autopilot_commands = path_follow.update(path, mav.true_state)
 
     #-------controller-------------
     delta, commanded_state = ctrl.update(autopilot_commands, estimated_state)

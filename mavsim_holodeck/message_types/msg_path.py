@@ -1,0 +1,29 @@
+"""
+msg_path
+    - messages type for input to path follower
+    
+part of mavsim_python
+    - Beard & McLain, PUP, 2012
+    - Last update:
+        3/11/2019 - RWB
+"""
+import numpy as np
+
+class msg_path:
+    def __init__(self):
+        # type='line' means straight line following, type='orbit' means orbit following
+        self.type = 'line'
+        # flag to indicate path recently changed (set by planner)
+        self.flag_path_changed = True
+        # desired airspeed along the path
+        self.airspeed = 25
+        # origin of the straight path line (r)
+        self.line_origin = np.array([0.0, 0.0, 0.0])
+        # direction of line -unit vector- (q)
+        self.line_direction = np.array([1.0, 0.0, 0.0])
+        # center of the orbit (c)
+        self.orbit_center = np.array([0.0, 0.0, 0.0])
+        # radius of the orbit (rho)
+        self.orbit_radius = 50
+        # orbit direction: 'CW'==clockwise, 'CCW'==counter clockwise
+        self.orbit_direction = 'CW'

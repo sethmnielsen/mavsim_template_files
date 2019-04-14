@@ -37,7 +37,9 @@ class dubins_params:
             S_xs = np.sin(chis)
             C_xe = np.cos(chie)
             S_xe = np.sin(chie)
-            c_rs = ps + R*rotz(np.pi/2)  @ np.array([[C_xs,S_xs,0]]).T
+            x = R*rotz(np.pi/2)
+            y = np.array([[C_xs,S_xs,0]]).T
+            c_rs = ps + x @ y
             c_ls = ps + R*rotz(-np.pi/2) @ np.array([[C_xs,S_xs,0]]).T
             c_re = pe + R*rotz(np.pi/2)  @ np.array([[C_xe,S_xe,0]]).T
             c_le = pe + R*rotz(-np.pi/2) @ np.array([[C_xe,S_xe,0]]).T

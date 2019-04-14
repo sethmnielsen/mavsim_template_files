@@ -1,0 +1,3 @@
+[submodule "mavsim_holodeck/holodeck"]
+	path = mavsim_holodeck/holodeck
+	url = git@github.com:sethmnielsen/holodeck.git

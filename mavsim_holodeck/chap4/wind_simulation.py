@@ -7,6 +7,7 @@ import sys
 sys.path.append('..')
 import numpy as np
 import parameters.aerosonde_parameters as MAV
+from IPython.core.debugger import Pdb
 
 class wind_simulation:
     def __init__(self, Ts):
@@ -35,6 +36,17 @@ class wind_simulation:
         self._gust_state = np.zeros(5)
         self._Ts = Ts
 
+        # self.u_w = transfer_function(num=np.array([[a1]]),
+        #                              den=np.array([[1, b1]]),
+        #                              Ts=Ts)
+        # self.v_w = transfer_function(num=np.array([[a2, a3]]),
+        #                              den=np.array([[1, 2*b2, b2**2.0]]),
+        #                              Ts=Ts)
+        # self.w_w = transfer_function(num=np.array([[a4, a5]]),
+        #                              den=np.array([[1, 2*b3, b3**2.0]]),
+        #                              Ts=Ts)
+
+
     def update(self, Va=MAV.u0):
         # returns a six vector.
         #   The first three elements are the steady state wind in the inertial frame
@@ -44,10 +56,10 @@ class wind_simulation:
 
     def _compute_A(self):
         A = np.array([[-self.Va/self.Lu, 0, 0, 0, 0],
-                      [0, -2*(self.Va/self.Lv), -(self.Va/self.Lv)**2, 0, 0],
-                      [0, 1, 0, 0, 0],
-                      [0, 0, 0, -2*(self.Va/self.Lw), -(self.Va/self.Lw)**2],
-                      [0, 0, 0, 1, 0]])
+                            [0, -2*(self.Va/self.Lv), -(self.Va/self.Lv)**2, 0, 0],
+                            [0, 1, 0, 0, 0],
+                            [0, 0, 0, -2*(self.Va/self.Lw), -(self.Va/self.Lw)**2],
+                            [0, 0, 0, 1, 0]])
         return A
 
     def _compute_C(self):
