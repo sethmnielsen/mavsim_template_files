@@ -12,8 +12,8 @@ import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import pyqtgraph.Vector as Vector
 
-from tools.rotations import Euler2Rotation
-from chap11.dubins_parameters import dubins_parameters
+from tools.tools import Euler2Rotation
+from chap11.dubins_params import dubins_params
 
 class waypoint_viewer():
     def __init__(self):
@@ -21,7 +21,7 @@ class waypoint_viewer():
         # initialize Qt gui application and window
         self.app = pg.QtGui.QApplication([])  # initialize QT
         self.window = gl.GLViewWidget()  # initialize the view object
-        self.window.setWindowTitle('Waypoint Viewer')
+        self.window.setWindowTitle('Path Viewer')
         self.window.setGeometry(0, 0, 1000, 1000)  # args: upper_left_x, upper_right_y, width, height
         grid = gl.GLGridItem() # make a grid to represent the ground
         grid.scale(self.scale/20, self.scale/20, self.scale/20) # set the size of the grid (distance between each line)
@@ -34,7 +34,7 @@ class waypoint_viewer():
         # get points that define the non-rotated, non-translated mav and the mesh colors
         self.mav_points, self.mav_meshColors = self.get_mav_points()
         # dubins path parameters
-        self.dubins_path = dubins_parameters()
+        self.dubins_path = dubins_params()
         self.mav_body = []
 
     ###################################
@@ -57,15 +57,14 @@ class waypoint_viewer():
                 self.drawPath(path)
 
         # update the center of the camera view to the mav location
-        # view_location = Vector(state.pe, state.pn, state.h)  # defined in ENU coordinates
-        # self.window.opts['center'] = view_location
+        #view_location = Vector(state.pe, state.pn, state.h)  # defined in ENU coordinates
+        #self.window.opts['center'] = view_location
         # redraw
         self.app.processEvents()
 
     def drawMAV(self, state):
         """
         Update the drawing of the MAV.
-
         The input to this function is a (message) class with properties that define the state.
         The following properties are assumed:
             state.pn  # north position
@@ -197,9 +196,9 @@ class waypoint_viewer():
 
     def drawPath(self, path):
         red = np.array([[1., 0., 0., 1]])
-        if path.type == 'line':
+        if path.flag == 'line':
             points = self.straight_line_points(path)
-        elif path.type == 'orbit':
+        elif path.flag == 'orbit':
             points = self.orbit_points(path)
         if not self.plot_initialized:
             path_color = np.tile(red, (points.shape[0], 1))
@@ -265,19 +264,32 @@ class waypoint_viewer():
 
     def straight_waypoint_points(self, waypoints):
         R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
-        wps = np.copy(waypoints.ned)
-        wps = wps[~np.all(np.isinf(wps), 1)]
-        points = R @ wps.T
+        if waypoints.flag_wrap_waypoints:
+            wpts = waypoints.ned[:,0:waypoints.num_waypoints]
+            wpts = np.hstack([wpts, wpts[:,0].reshape(3,1)])
+        else:
+            wpts = waypoints.ned[:,0:waypoints.num_waypoints]
+        points = R @ wpts
         return points.T
 
     def dubins_points(self, waypoints, radius, Del):
         initialize_points = True
-        for j in range(0, waypoints.num_waypoints-1):
+        if waypoints.flag_wrap_waypoints:
+            wpts = waypoints.ned[:,0:waypoints.num_waypoints]
+            wpts = np.hstack([wpts, wpts[:,0].reshape(3,1)])
+            course = waypoints.course[0,0:waypoints.num_waypoints]
+            course = np.hstack([course,np.array([course.item(0)])])
+            num = waypoints.num_waypoints
+        else:
+            wpts = waypoints.ned
+            course = waypoints.course
+            num = waypoints.num_waypoints - 1
+        for j in range(0, num):
             self.dubins_path.update(
-                waypoints.ned[j:j+1],
-                waypoints.course.item(j),
-                waypoints.ned[j+1:j+2],
-                waypoints.course.item(j+1),
+                wpts[:, j:j+1],
+                course.item(j),
+                wpts[:, j+1:j+2],
+                course.item(j+1),
                 radius)
 
             # points along start circle
@@ -372,5 +384,3 @@ def mod(x):
     while x > 2*np.pi:
         x -= 2*np.pi
     return x
-
-

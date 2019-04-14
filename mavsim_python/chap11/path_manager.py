@@ -21,6 +21,7 @@ class path_manager:
         self.manager_state = 1
         # dubins path parameters
         self.dubins_path = dubins_parameters()
+        self.path_segment_changed = True
 
     def update(self, waypoints, radius, state):
         # this flag is set for one time step to signal a redraw in the viewer
@@ -30,6 +31,9 @@ class path_manager:
             self.initialize_pointers()
             waypoints.flag_waypoints_changed = False
             self.manager_state = 1
+        
+        if self.path.flag_path_changed:
+            self.path.flag_path_changed = False
             
         if waypoints.num_waypoints == 0:
             waypoints.flag_manager_requests_waypoints = True
@@ -45,75 +49,85 @@ class path_manager:
         return self.path
 
     def line_manager(self, waypoints, state):
+        p = np.array([state.pn, state.pe, -state.h])
         w_prev = waypoints.ned[self.ptr_prev]
         wi     = waypoints.ned[self.ptr_current]
         w_next = waypoints.ned[self.ptr_next]
         
-        if np.all(np.isinf(self.halfspace_n)):
-            q_prev = wi - w_prev
-            q_prev /= np.linalg.norm(wi - w_prev)
-            qi = w_next - wi
-            qi /= np.linalg.norm(qi)
+        q_prev = wi - w_prev
+        q_prev /= np.linalg.norm(wi - w_prev)
+        qi = w_next - wi
+        qi /= np.linalg.norm(qi)
 
-            n = q_prev + qi
-            n /= np.linalg.norm(n)
-            
-            self.halfspace_r = np.copy(wi)
-            self.halfspace_n = np.copy(n)
+        n = q_prev + qi
+        n /= np.linalg.norm(n)
+        
+        self.halfspace_r = wi
+        self.halfspace_n = n
 
-            self.path.flag = 'line'
-            self.path.airspeed = waypoints.airspeed[self.ptr_current]
-            self.path.line_origin = np.copy(w_prev)
-            self.path.line_direction = np.copy(q_prev)
-
-        p = np.array([state.pn, state.pe, -state.h])
+        self.path.flag = 'line'
+        self.path.airspeed = waypoints.airspeed[self.ptr_current]
+        self.path.line_origin = w_prev
+        self.path.line_direction = q_prev
 
         if self.inHalfSpace(p):
             self.increment_pointers()
             self.path.flag_path_changed = True
             self.path.line_origin = waypoints.ned[self.ptr_prev]
-            qi = w_next - wi
-            qi /= np.linalg.norm(qi)
             self.path.line_direction = qi
-            self.halfspace_n = np.inf * np.ones(3)
-        else:
-            self.path.flag_path_changed = False
         
     def fillet_manager(self, waypoints, radius, state):
+        p = np.array([state.pn, state.pe, -state.h])
         w_prev = waypoints.ned[self.ptr_prev]
         wi     = waypoints.ned[self.ptr_current]
         w_next = waypoints.ned[self.ptr_next]
+
+        q_prev = wi - w_prev
+        q_prev /= np.linalg.norm(wi - w_prev)
+        qi = w_next - wi
+        qi /= np.linalg.norm(qi)
         
-        if np.all(np.isinf(self.halfspace_n)):
-            q_prev = wi - w_prev
-            q_prev /= np.linalg.norm(wi - w_prev)
-            qi = w_next - wi
-            qi /= np.linalg.norm(qi)
+        var_phi = np.arccos(-q_prev @ qi)
 
-            n = q_prev + qi
-            n /= np.linalg.norm(n)
-            
-            self.halfspace_r = np.copy(wi)
-            self.halfspace_n = np.copy(n)
-
+        if self.manager_state == 1:
             self.path.flag = 'line'
+            self.path.line_origin = w_prev
+            self.path.line_direction = q_prev
             self.path.airspeed = waypoints.airspeed[self.ptr_current]
-            self.path.line_origin = np.copy(w_prev)
-            self.path.line_direction = np.copy(q_prev)
 
-        p = np.array([state.pn, state.pe, -state.h])
+            z = wi - (radius/np.tan(var_phi/2))*q_prev
+            self.halfspace_r = z
+            self.halfspace_n = q_prev
 
-        if self.inHalfSpace(p):
-            self.increment_pointers()
-            self.path.flag_path_changed = True
-            self.path.line_origin = waypoints.ned[self.ptr_prev]
-            qi = w_next - wi
-            qi /= np.linalg.norm(qi)
-            self.path.line_direction = qi
-            self.halfspace_n = np.inf * np.ones(3)
-        else:
-            self.path.flag_path_changed = False
-        
+            switch = self.inHalfSpace(p)
+            if switch:
+                self.manager_state = 2
+                self.path.flag_path_changed = True
+
+        elif self.manager_state == 2:
+            qn = q_prev - qi
+            qn /= np.linalg.norm(qn)
+            c = wi - (radius/np.sin(var_phi/2.0))*qn
+            lam = np.sign(q_prev[0]*qi[1] - q_prev[1]*qi[0])
+
+            self.path.flag = 'orbit'
+            self.path.orbit_center = c
+            self.path.orbit_radius = radius
+            self.path.airspeed = waypoints.airspeed[self.ptr_current]
+            if lam > 0:
+                self.path.orbit_direction = 'CW'
+            else:
+                self.path.orbit_direction = 'CCW'
+
+            z = wi + (radius/np.tan(var_phi/2))*qi
+            self.halfspace_r = z
+            self.halfspace_n = qi
+
+            if self.inHalfSpace(p):
+                self.increment_pointers()
+                self.manager_state = 1
+                self.path.flag_path_changed = True
+
     def dubins_manager(self, waypoints, radius, state):
         pass
 

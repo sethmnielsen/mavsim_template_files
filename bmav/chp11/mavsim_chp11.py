@@ -55,7 +55,7 @@ data_view = data_viewer()
 sim_time = SIM.t0
 
 # main simulation loop
-print("Press Ctrl-Q to exiasdfasdfafasdfasdft...")
+print("Press Ctrl-Q to exit...")
 while sim_time < SIM.t_end:
     #-----------observer---------------------
     measurements = dyn.sensors

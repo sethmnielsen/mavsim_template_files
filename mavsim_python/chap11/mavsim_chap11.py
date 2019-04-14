@@ -38,8 +38,8 @@ path_manage = path_manager()
 # waypoint definition
 from message_types.msg_waypoints import msg_waypoints
 waypoints = msg_waypoints()
-waypoints.type = 'straight_line'
-# waypoints.type = 'fillet'
+# waypoints.type = 'straight_line'
+waypoints.type = 'fillet'
 # waypoints.type = 'dubins'
 waypoints.num_waypoints = 4
 Va = PLAN.Va0
@@ -56,6 +56,10 @@ waypoints.course[:waypoints.num_waypoints] = np.array([np.radians(0),
 # initialize the simulation time
 sim_time = SIM.start_time
 
+delta = np.zeros(4)
+mav.update(delta)  # propagate the MAV dynamics
+mav.update_sensors()
+
 # main simulation loop
 print("Press Q to exit...")
 while sim_time < SIM.end_time:
@@ -67,7 +71,8 @@ while sim_time < SIM.end_time:
     path = path_manage.update(waypoints, PLAN.R_min, estimated_state)
 
     #-------path follower-------------
-    autopilot_commands = path_follow.update(path, estimated_state)
+    # autopilot_commands = path_follow.update(path, estimated_state)
+    autopilot_commands = path_follow.update(path, mav.true_state)
 
     #-------controller-------------
     delta, commanded_state = ctrl.update(autopilot_commands, estimated_state)

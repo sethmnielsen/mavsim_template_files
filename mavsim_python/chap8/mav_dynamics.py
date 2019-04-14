@@ -62,7 +62,7 @@ class mav_dynamics:
 
     ###################################
     # public functions
-    def update(self, delta, wind):
+    def update(self, delta, wind=np.zeros(6)):
         '''
             Integrate the differential equations defining dynamics, update sensors
             delta = (delta_a, delta_e, delta_r, delta_t) are the control inputs
