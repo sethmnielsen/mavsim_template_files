@@ -17,7 +17,7 @@ def compute_trim(mav, Va, gamma):
     e = Euler2Quaternion([0, gamma, 0])
     state0 = np.array([0,    # (0)
                        0,    # (1)
-                       -100,    # (2)
+                       -20,    # (2)
                        Va,   # (3)
                        0,    # (4)
                        0,    # (5)

@@ -12,7 +12,7 @@ class MoveableWindow(GraphicsWindow):
         if event.key() == QtCore.Qt.Key_Q:
             print("\nDetected 'Q' keypress: Exiting\n")
             sys.exit()
-
+            
     def location_on_the_screen(self, x=0, y=0):
         # screen = QDesktopWidget().screenGeometry()
         # widget = self.geometry()

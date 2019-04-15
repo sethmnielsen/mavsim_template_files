@@ -4,7 +4,7 @@ msg_waypoints
     
 part of mavsim_python
     - Beard & McLain, PUP, 2012
-    - Last update:
+    - Last update:z
         3/26/2019 - RWB
 """
 import numpy as np

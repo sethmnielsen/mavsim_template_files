@@ -32,8 +32,10 @@ class dubins_parameters:
     def update(self, ps, chis, pe, chie, R):
         ell = np.linalg.norm(ps - pe)
         if ell < 2 * R:
-            print('Error in Dubins Parameters: \
-                   The distance between nodes must be larger than 2R.')
+            str1 = 'Error in Dubins Parameters: ' + \
+                   'The distance between nodes must be larger than 2R'
+            str2 = '\nCurrent dist: {:2f} | needed dist: {:2f}'.format(ell, 2*R)
+            raise ValueError(str1 + str2)
         else:
             cxs = np.cos(chis)
             sxs = np.sin(chis)

@@ -16,7 +16,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/mavsim_holodeck.py",
-            "console": "none",
+            "console": "integratedTerminal",
             "env":{
                 "PYTHONPATH": "${workspaceRoot}/holodeck/"
             }
