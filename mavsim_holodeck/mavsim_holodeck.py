@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-from message_types.msg_waypoints import msg_waypoints
 import numpy as np
 import holodeck
 from holodeck import agents
 from holodeck.environments import *
 from holodeck import sensors
 import os
+import sys, traceback
+import cv2
+
 import parameters.simulation_parameters as SIM
 import parameters.planner_parameters as PLAN
+from message_types.msg_waypoints import msg_waypoints
 
 from chap3.data_viewer import data_viewer
 from chap4.wind_simulation import wind_simulation
@@ -21,8 +24,67 @@ print( '\nHOLODECK PATH: {}\n'.format( os.path.dirname( holodeck.__file__ ) ) )
 
 np.set_printoptions(precision=3, suppress=True, sign=' ', floatmode='fixed')
 
-# Holodeck Setup
-env = holodeck.make("UrbanCity")
+try:
+    # Holodeck Setup
+    env = holodeck.make("Ocean", show_viewport=True)
+    SHOW_PIXELS = False
+    env.reset()
+    # wave intensity: 1-13, wave size: 1-8, wave dir: 0-360 deg
+    env.set_ocean_state(3, 3, 90)
+    env.set_day_time(6)
+    env.set_weather('Cloudy')
+    env.set_aruco_code(False)
+
+    env.set_control_scheme("uav0", ControlSchemes.UAV_ROLL_PITCH_YAW_RATE_ALT)
+    uav_cmd = np.array([0, -0.2, 0, 3])
+    boat_cmd = 0
+    env.act("uav0", uav_cmd)
+    env.act("boat0", boat_cmd)
+
+    state = env.set_state("uav0", [-1500, 0, 6000], [0,0,0], [0,0,0], [0,0,0])["uav0"]
+    state = env.set_state("uav0", [-1500, 0, 500], [0,0,0], [0,0,0], [0,0,0])["uav0"]
+    env.teleport("boat0", location=[5000, 0, 0], rotation=[0, 0, 0])
+
+    pos = np.array([0, 0, 3]) * 100
+    att = np.array([0, 0, 0])
+    vel = np.array([0, 0, 0]) * 100
+    angvel = np.array([0, 0, 0])
+    state = env.set_state("uav0", pos, att, vel, angvel)["uav0"]
+
+    print("\nBEGIN")
+    # print("Collision:\n", state["CollisionSensor"])
+    print("Location:\n", state["LocationSensor"])
+    print("Orientation:\n", state["OrientationSensor"])
+    print("Velocity:\n", state["VelocitySensor"])
+    print("IMU:\n", state["IMUSensor"])
+
+    pos = state["LocationSensor"]
+    cam_alt = 39
+    # env.teleport_camera([0, 0, cam_alt], [0, 0, -0.5])
+    for i in range(300):
+        state = env.tick()["uav0"]
+        pos = state["LocationSensor"]
+        # env.teleport_camera([0, 0, cam_alt], [0, 0, -0.5])
+
+        if SHOW_PIXELS:
+            pixels = state["RGBCamera"]
+            cv2.imshow('Camera', pixels)
+            cv2.waitKey(20)
+
+        
+    print("\nEND")
+    print("Location:\n", state["LocationSensor"])
+    print("Orientation:\n", state["OrientationSensor"])
+    print("Velocity:\n", state["VelocitySensor"])
+    print("IMU:\n", state["IMUSensor"])
+
+except KeyboardInterrupt:
+    print("Shutdown requested...exiting")
+except Exception as e:
+    traceback.print_exc(file=sys.stdout)
+    print(e)
+
+sys.exit(0)
 
 DATA = True
 if DATA:
