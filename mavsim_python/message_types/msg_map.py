@@ -25,7 +25,7 @@ class msg_map:
             self.building_width = PLAN.city_width/PLAN.num_blocks * (1-PLAN.street_width)
             # an array of the north corner of buildings
             self.building_north = np.zeros(PLAN.num_blocks)
-            for i in range(0, PLAN.num_blocks):
+            for i in range(PLAN.num_blocks):
                 self.building_north[i] = 0.5*PLAN.city_width/PLAN.num_blocks*(2*(i)+1)
             # an array of the east corner of buildings
             self.building_east = self.building_north

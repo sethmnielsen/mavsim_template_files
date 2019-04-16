@@ -273,10 +273,10 @@ class world_viewer():
         initialize_points = True
         for j in range(0, waypoints.num_waypoints-1):
             self.dubins_path.update(
-                waypoints.ned[:, j],
-                waypoints.course.item(j),
-                waypoints.ned[:, j+1],
-                waypoints.course.item(j+1),
+                waypoints.ned[j],
+                waypoints.course[j],
+                waypoints.ned[j+1],
+                waypoints.course[j+1],
                 radius)
 
             # points along start circle
