@@ -7,7 +7,6 @@ part of mavPySim
     - Update history:  
         1/9/2019 - RWB
 """
-
 class msg_state:
     def __init__(self):
         self.pn = 0.      # inertial north position in meters

@@ -45,7 +45,6 @@ sim_time = SIM.start_time
 
 delta = np.zeros(4)
 mav.update(delta)  # propagate the MAV dynamics
-mav.update_sensors()
 
 # main simulation loop
 print("Press Command-Q to exit...")
