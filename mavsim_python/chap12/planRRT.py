@@ -1,6 +1,6 @@
 import numpy as np
 from message_types.msg_waypoints import msg_waypoints
-
+from message_types.msg_map import msg_map
 
 class planRRT():
     def __init__(self):
@@ -36,25 +36,29 @@ class planRRT():
         path = self.findMinimumPath(tree, end_node)
         return self.smoothPath(path, map)
 
-    def generateRandomPoint(map, pd):
+    def generateRandomNode(self, map=msg_map(), pd=-100):
+        pn = np.random.randint(map.building_north[-1])
+        pe = np.random.randint(map.building_east[-1])
+        node = np.array([pn, pe, pd, 0, 0, 0])
+        return node
+
+    def collision(self, start_node, end_node, map):
         pass
 
-    def collision(start_node, end_node, map):
+    def pointsAlongPath(self, start_node, end_node, Del):
         pass
 
-    def pointsAlongPath(start_node, end_node, Del):
+    def downAtNE(self, map, n, e):
         pass
 
-    def downAtNE(map, n, e):
-        pass
-
-    def extendTree(tree, end_node, segmentLength, map, pd):
-        node = self.generateRandomNode(map, pd)
+    def extendTree(self, tree, end_node, segmentLength, map, pd):
+        node = self.generateRandomNode(map)
+        while not self.collision(tree[0], node, )
         
 
-    def findMinimumPath(tree, end_node):
+    def findMinimumPath(self, tree, end_node):
         pass
 
-    def smoothPath(path, map):
+    def smoothPath(self, path, map):
         pass
 
