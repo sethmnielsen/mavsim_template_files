@@ -8,6 +8,7 @@ part of mavsim_python
         3/26/2019 - RWB
 """
 import numpy as np
+import parameters.planner_parameters as PLAN
 
 class msg_waypoints:
     def __init__(self):
@@ -37,8 +38,17 @@ class msg_waypoints:
         self.course = np.inf * np.ones(self.max_waypoints)
 
         # these variables are used by the path planner running cost at each node
-        self.cost = np.inf * np.ones(self.max_waypoints)
+        # self.cost = np.inf * np.ones(self.max_waypoints)
         # index of the parent to the node
-        self.parent_idx = np.inf * np.ones(self.max_waypoints)
+        # self.parent_idx = np.inf * np.ones(self.max_waypoints)
         # can this node connect to the goal?
-        self.flag_connect_to_goal = 0 * np.ones(self.max_waypoints)
+        # self.flag_connect_to_goal = 0 * np.ones(self.max_waypoints)
+
+    def add_waypoints(self, wp_type, wp_neds, wp_courses):
+        self.ned = wp_neds
+        self.type = wp_type
+        self.course = wp_courses
+        self.flag_waypoints_changed = True
+        self.num_waypoints = self.ned.shape[0]
+        self.airspeed = np.array([PLAN.Va0]*self.num_waypoints)
+        

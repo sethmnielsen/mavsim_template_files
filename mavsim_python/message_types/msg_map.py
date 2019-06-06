@@ -19,21 +19,17 @@ class msg_map:
             self.street_width = PLAN.city_width/PLAN.num_blocks*PLAN.street_width
             # maximum height of buildings
             self.building_max_height = PLAN.building_height
-            
             # an array of building heights
-            # indexed as [index_N, index_E]
-            self.building_height = (PLAN.building_height * np.random.rand(PLAN.num_blocks, PLAN.num_blocks)).T
-
+            # indexed as [index_E, index_N]
+            self.building_height = PLAN.building_height * np.random.rand(PLAN.num_blocks, PLAN.num_blocks)
+            # alternate array indexed as [index_N, index_E]
+            self.bldg_heights = self.building_height.T
             # the width of the buildings (all the same)
-            self.building_width = PLAN.city_width/PLAN.num_blocks * (1-PLAN.street_width)
+            self.building_width = np.ceil(PLAN.city_width/PLAN.num_blocks * (1-PLAN.street_width))
             # an array of the north corner of buildings
             self.building_north = np.zeros(PLAN.num_blocks)
             for i in range(PLAN.num_blocks):
                 self.building_north[i] = 0.5*PLAN.city_width/PLAN.num_blocks*(2*(i)+1)
             # an array of the east corner of buildings
             self.building_east = self.building_north
-
-            window = np.ones(PLAN.num_blocks) * self.building_width/2
-            self.collision_range = np.array([self.building_north - window, 
-                                             self.building_north + window]).T
 

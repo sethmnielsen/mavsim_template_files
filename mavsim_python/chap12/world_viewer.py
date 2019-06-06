@@ -266,7 +266,9 @@ class world_viewer():
 
     def straight_waypoint_points(self, waypoints):
         R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
-        points = R @ waypoints.ned
+        wps = np.copy(waypoints.ned)
+        wps = wps[~np.all(np.isinf(wps), 1)]
+        points = R @ wps.T
         return points.T
 
     def dubins_points(self, waypoints, radius, Del):
