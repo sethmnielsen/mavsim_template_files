@@ -14,7 +14,7 @@
                 "PYTHONPATH": "${workspaceRoot}"
             },
             "console": "integratedTerminal",
-            "debugStdLib": true
+            "justMyCode": false
         },
         {
             "name": "mavsim_b",
@@ -26,7 +26,7 @@
                 "PYTHONPATH": "${workspaceRoot}"
             },
             "console": "integratedTerminal",
-            "debugStdLib": true
+            "justMyCode": false
         },
         {
             "name": "Python: Current File (Integrated Terminal)",
@@ -38,7 +38,7 @@
                 "PYTHONPATH": "${workspaceRoot}"
             },
             "console": "integratedTerminal",
-            "debugStdLib": true
+            "justMyCode": false
         },
         {
             "name": "Python: Remote Attach",
